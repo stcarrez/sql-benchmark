@@ -1,5 +1,9 @@
 *.log
 *~
+java/.idea
+java/target
+ado/bin
+ado/obj
 ado/autom4te.cache
 ado/config.status
 ado/Makefile
