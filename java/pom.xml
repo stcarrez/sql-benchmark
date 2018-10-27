@@ -4,7 +4,7 @@
   <groupId>org.ciceron.sqlbenchmark</groupId>
   <artifactId>sql-benchmark</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>sql-benchmark</name>
   <url>http://maven.apache.org</url>
 
@@ -36,6 +36,25 @@
       <timezone>+1</timezone>
     </developer>
   </developers>
+
+  <build>
+  <plugins>
+    <plugin>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <configuration>
+        <archive>
+          <manifest>
+            <mainClass>org.ciceron.sqlbenchmark.Main</mainClass>
+          </manifest>
+        </archive>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <appendAssemblyId>false</appendAssemblyId>
+      </configuration>
+    </plugin>
+  </plugins>
+  </build>
 
   <dependencies>
     <dependency>
