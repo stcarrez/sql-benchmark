@@ -1,0 +1,7 @@
+*.log
+*~
+ado/autom4te.cache
+ado/config.status
+ado/Makefile
+ado/sqlbench.gpr
+
