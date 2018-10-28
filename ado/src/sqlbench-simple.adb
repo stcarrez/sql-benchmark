@@ -112,44 +112,60 @@ package body Sqlbench.Simple is
    end Insert;
 
    procedure Select_Table_1 (Context : in out Context_Type) is
-      Name  : constant String := Context.Get_Parameter ("table");
       DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
+      Count : Natural;
       Stmt  : ADO.Statements.Query_Statement
         := DB.Create_Statement ("SELECT * FROM test_simple LIMIT 1");
    begin
       for I in 1 .. Context.Repeat loop
          Stmt.Execute;
+         Count := 0;
          while Stmt.Has_Elements loop
+            Count := Count + 1;
             Stmt.Next;
          end loop;
+         if Count /= 1 then
+            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
+         end if;
       end loop;
    end Select_Table_1;
 
    procedure Select_Table_10 (Context : in out Context_Type) is
-      Name  : constant String := Context.Get_Parameter ("table");
       DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
+      Count : Natural;
       Stmt  : ADO.Statements.Query_Statement
         := DB.Create_Statement ("SELECT * FROM test_simple LIMIT 10");
    begin
       for I in 1 .. Context.Repeat loop
          Stmt.Execute;
+         Count := 0;
          while Stmt.Has_Elements loop
+            Count := Count + 1;
             Stmt.Next;
          end loop;
+         if Count /= 10 then
+            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
+         end if;
       end loop;
    end Select_Table_10;
 
    procedure Select_Table_100 (Context : in out Context_Type) is
       Name  : constant String := Context.Get_Parameter ("table");
       DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
+      Count : Natural;
       Stmt  : ADO.Statements.Query_Statement
         := DB.Create_Statement ("SELECT * FROM test_simple LIMIT 100");
    begin
       for I in 1 .. Context.Repeat loop
          Stmt.Execute;
+         Count := 0;
          while Stmt.Has_Elements loop
+            Count := Count + 1;
             Stmt.Next;
          end loop;
+         if Count /= 100 then
+            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
+         end if;
       end loop;
    end Select_Table_100;
 
