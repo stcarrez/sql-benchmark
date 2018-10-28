@@ -27,16 +27,36 @@ import java.sql.SQLException;
 
 public class Main {
 
+    private static void Usage() {
+        System.err.println("Usage: java -jar sql-benchmark.jar [-sqlite|-mysql|-postgresql] [-repeat N]");
+        System.exit(2);
+    }
+
     public static void main(String[] args) {
         String driver = "sqlite";
 
-        for (int i = 1; i < args.length; i++) {
+        long repeat = 10;
+        for (int i = 0; i < args.length; i++) {
             if ("-mysql".equals(args[i])) {
                 driver = "mysql";
             } else if ("-sqlite".equals(args[i])) {
                 driver = "sqlite";
             } else if ("-postgresql".equals(args[i])) {
                 driver = "postgresql";
+            } else if ("-repeat".equals(args[i])) {
+                i++;
+                if (i == args.length) {
+                    System.err.println("Missing argument to -repeat option");
+                    Usage();
+                }
+                try {
+                    repeat = Long.parseLong(args[i]);
+                } catch (NumberFormatException ex) {
+                    System.err.println("Repeat count is not a number");
+                    Usage();
+                }
+            } else {
+                Usage();
             }
         }
 
@@ -53,6 +73,8 @@ public class Main {
                 System.err.println("Cannot configure the database for driver: " + driver);
                 System.exit(1);
             }
+            Benchmark.setBaseRepeat(repeat);
+
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
