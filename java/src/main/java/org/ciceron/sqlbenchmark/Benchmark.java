@@ -66,13 +66,17 @@ public abstract class Benchmark {
     private String mTitle;
     private final int mFactor;
 
-    static void loadConfiguration(String path) throws IOException {
+    public static void loadConfiguration(String path) throws IOException {
         FileInputStream input = new FileInputStream(path);
         mConfig.load(input);
         input.close();
     }
 
-    static boolean setDatabase(String driver) throws SQLException {
+    public static void setBaseRepeat(long value) {
+        mBaseRepeat = value;
+    }
+
+    public static boolean setDatabase(String driver) throws SQLException {
         String config = (String) mConfig.get(driver + ".database");
 
         mDriverName = driver;
