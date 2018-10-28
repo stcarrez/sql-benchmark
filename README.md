@@ -10,8 +10,8 @@ languages and SQL databases.  Some of the goals are:
 
 # Languages
 
-* [Java Benchmark](https://github.com/stcarrez/sql-benchmark/java/README.md)
-* [Ada Benchmark](https://github.com/stcarrez/sql-benchmark/ado/README.md)
+* [Java Benchmark](https://github.com/stcarrez/sql-benchmark/tree/master/java)
+* [Ada Benchmark](https://github.com/stcarrez/sql-benchmark/tree/master/ado)
 
 # Databases
 
