@@ -28,7 +28,17 @@ import java.sql.SQLException;
 public class Main {
 
     public static void main(String[] args) {
-        String driver = "mysql";
+        String driver = "sqlite";
+
+        for (int i = 1; i < args.length; i++) {
+            if ("-mysql".equals(args[i])) {
+                driver = "mysql";
+            } else if ("-sqlite".equals(args[i])) {
+                driver = "sqlite";
+            } else if ("-postgresql".equals(args[i])) {
+                driver = "postgresql";
+            }
+        }
 
         // Load the configuration file.
         try {
