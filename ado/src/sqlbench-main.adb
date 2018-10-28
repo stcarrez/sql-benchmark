@@ -98,13 +98,14 @@ begin
       when others =>
          null;
    end;
-   Ada.Text_IO.Put ("<benchmark ");
-   Ada.Text_IO.Put ("threads='");
-   Ada.Text_IO.Put (Natural'Image (Thread_Count));
+   Ada.Text_IO.Put ("<benchmark language='Ada' driver='");
+   Ada.Text_IO.Put (Context.Get_Driver_Name);
+   Ada.Text_IO.Put ("' threads='");
+   Ada.Text_IO.Put (Util.Strings.Image (Thread_Count));
    Ada.Text_IO.Put ("' rss_size='");
-   Ada.Text_IO.Put (Natural'Image (Rss_Size));
+   Ada.Text_IO.Put (Util.Strings.Image (Rss_Size));
    Ada.Text_IO.Put ("' peek_rss_size='");
-   Ada.Text_IO.Put (Natural'Image (Hwm_Size));
+   Ada.Text_IO.Put (Util.Strings.Image (Hwm_Size));
    Ada.Text_IO.Put_Line ("'>");
    Util.Measures.Write (Context.Perf, "SQL Benchmark", Ada.Text_IO.Standard_Output);
    Ada.Text_IO.Put_Line ("</benchmark>");
