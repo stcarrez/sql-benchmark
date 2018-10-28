@@ -1,0 +1,4 @@
+CREATE table test_simple (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  value INTEGER
+)
