@@ -56,7 +56,7 @@ package body Sqlbench is
    function Get_Config_Path (Context : in Context_Type;
                              Name    : in String) return String is
    begin
-      return Util.Files.Compose ("config", Context.Session.Get_Driver.Get_Driver_Name & "-" & Name);
+      return Util.Files.Compose ("config", Context.Get_Driver_Name & "-" & Name);
    end Get_Config_Path;
 
    --  ------------------------------
