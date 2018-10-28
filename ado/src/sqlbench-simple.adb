@@ -42,8 +42,11 @@ package body Sqlbench.Simple is
    Create_SQL : Ada.Strings.Unbounded.Unbounded_String;
 
    procedure Register (Tests : in out Context_Type) is
+      Driver : constant String := Tests.Get_Driver_Name;
    begin
-      Tests.Register (Do_Static'Access, "DO 1");
+      if Driver /= "sqlite" then
+         Tests.Register (Do_Static'Access, "DO 1");
+      end if;
       Tests.Register (Select_Static'Access, "SELECT 1");
       Tests.Register (Connect_Select_Static'Access, "CONNECT; SELECT 1; CLOSE");
       Tests.Register (Drop_Create'Access, "DROP table; CREATE table", 1);
