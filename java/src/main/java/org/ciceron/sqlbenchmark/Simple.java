@@ -40,6 +40,18 @@ public class Simple {
 
         byte[] encoded = Files.readAllBytes(Paths.get(Benchmark.getConfigPath("create-table.sql")));
         createSQL = new String(encoded, StandardCharsets.UTF_8);
+
+        if ("sqlite".equals(Benchmark.getDriverName())) {
+            return new Benchmark[]{
+                            new Select_Static(),
+                            new Connect_Select_Static(),
+                            new Drop_Create(),
+                            new Insert(),
+                            new Select_Table_1(),
+                            new Select_Table_10(),
+                            new Select_Table_100()
+                    };
+        }
         return new Benchmark[]{
                 new Do_Static(),
                 new Select_Static(),
@@ -95,7 +107,7 @@ public class Simple {
             for (int i = 0; i < mRepeat; i++) {
                 Connection conn = mDataSource.getConnection();
                 Statement stmt = conn.createStatement();
-                stmt.execute("DO 1");
+                stmt.execute("SELECT 1");
                 stmt.close();
                 conn.close();
             }
@@ -109,19 +121,24 @@ public class Simple {
 
         @Override
         public void execute() throws SQLException {
-            PreparedStatement dropStmt = mConnection.prepareStatement("DROP TABLE test_simple");
             PreparedStatement createStmt = mConnection.prepareStatement(createSQL);
 
             for (int i = 0; i < mRepeat; i++) {
+                PreparedStatement dropStmt = null;
                 try {
+                    dropStmt = mConnection.prepareStatement("DROP TABLE test_simple");
                     dropStmt.execute();
                 } catch (SQLException ex) {
 
                 }
-                createStmt.execute();
+                if (dropStmt != null) {
+                    dropStmt.close();
+                }
+                if (!createStmt.execute()) {
+                    throw new SQLException("Create table failed");
+                }
             }
             createStmt.close();
-            dropStmt.close();
         }
     }
 
@@ -155,10 +172,14 @@ public class Simple {
             for (int i = 0; i < mRepeat; i++) {
                 if (stmt.execute()) {
                     ResultSet rs = stmt.getResultSet();
+                    int count = 0;
                     while (rs.next()) {
-
+                        count++;
                     }
                     rs.close();
+                    if (count != 1) {
+                        throw new SQLException("Invalid result count: " + count);
+                    }
                 } else {
                     throw new SQLException("No result");
                 }
@@ -180,10 +201,14 @@ public class Simple {
             for (int i = 0; i < mRepeat; i++) {
                 if (stmt.execute()) {
                     ResultSet rs = stmt.getResultSet();
+                    int count = 0;
                     while (rs.next()) {
-
+                        count++;
                     }
                     rs.close();
+                    if (count != 10) {
+                        throw new SQLException("Invalid result count: " + count);
+                    }
                 } else {
                     throw new SQLException("No result");
                 }
@@ -205,10 +230,14 @@ public class Simple {
             for (int i = 0; i < mRepeat; i++) {
                 if (stmt.execute()) {
                     ResultSet rs = stmt.getResultSet();
+                    int count = 0;
                     while (rs.next()) {
-
+                        count++;
                     }
                     rs.close();
+                    if (count != 100) {
+                        throw new SQLException("Invalid result count: " + count);
+                    }
                 } else {
                     throw new SQLException("No result");
                 }
