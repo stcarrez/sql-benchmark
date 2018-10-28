@@ -21,6 +21,8 @@ with Ada.Text_IO;
 
 with Util.Log.Loggers;
 with Util.Measures;
+with Util.Strings;
+with Util.Files;
 
 with ADO;
 with ADO.Drivers;
@@ -31,7 +33,40 @@ with Sqlbench.Simple;
 
 procedure Sqlbench.Main is
 
+   procedure Read_Line (Line : in String);
+
    Log     : constant Util.Log.Loggers.Logger := Util.Log.Loggers.Create ("Sqlbench.Main");
+
+   Thread_Count : Natural := 0;
+   Rss_Size     : Natural := 0;
+   Hwm_Size     : Natural := 0;
+
+   procedure Read_Line (Line : in String) is
+      Pos  : Natural := Util.Strings.Index (Line, ASCII.HT);
+      Last : Natural := Util.Strings.Rindex (Line, ' ');
+   begin
+      Log.Debug ("{0}", Line);
+
+      if Pos = 0 then
+         Pos := Util.Strings.Index (Line, ' ');
+      end if;
+      if Last = 0 then
+         Last := Line'Last;
+      end if;
+      if Pos > 0 then
+         if Util.Strings.Starts_With (Line, "Threads:") then
+            Thread_Count := Natural'Value (Line (Pos + 1 .. Last));
+         elsif Util.Strings.Starts_With (Line, "VmRSS:") then
+            Rss_Size := Natural'Value (Line (Pos + 1 .. Last));
+         elsif Util.Strings.Starts_With (Line, "VmHWM:") then
+            Hwm_Size := Natural'Value (Line (Pos + 1 .. Last));
+         end if;
+      end if;
+
+   exception
+      when Constraint_Error =>
+         null;
+   end Read_Line;
 
    Context : Sqlbench.Context_Type;
 begin
@@ -56,7 +91,23 @@ begin
       end;
    end loop;
 
+   begin
+      Util.Files.Read_File (Path => "/proc/self/status", Process => Read_Line'Access);
+
+   exception
+      when others =>
+         null;
+   end;
+   Ada.Text_IO.Put ("<benchmark ");
+   Ada.Text_IO.Put ("threads='");
+   Ada.Text_IO.Put (Natural'Image (Thread_Count));
+   Ada.Text_IO.Put ("' rss_size='");
+   Ada.Text_IO.Put (Natural'Image (Rss_Size));
+   Ada.Text_IO.Put ("' peek_rss_size='");
+   Ada.Text_IO.Put (Natural'Image (Hwm_Size));
+   Ada.Text_IO.Put_Line ("'>");
    Util.Measures.Write (Context.Perf, "SQL Benchmark", Ada.Text_IO.Standard_Output);
+   Ada.Text_IO.Put_Line ("</benchmark>");
 
 exception
    when E : ADO.Drivers.Database_Error | ADO.Sessions.Connection_Error =>
