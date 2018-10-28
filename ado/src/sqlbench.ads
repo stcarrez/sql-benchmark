@@ -22,6 +22,8 @@ private with Util.Properties;
 private with Ada.Containers.Indefinite_Vectors;
 package Sqlbench is
 
+   Benchmark_Error : exception;
+
    type Context_Type is tagged limited private;
 
    type Repeat_Type is new Positive range 1 .. 1_000_000;
