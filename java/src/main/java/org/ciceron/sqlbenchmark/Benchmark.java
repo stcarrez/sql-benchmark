@@ -23,9 +23,16 @@
 package org.ciceron.sqlbenchmark;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteDataSource;
+import org.sqlite.SQLiteOpenMode;
 
 import javax.sql.DataSource;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -84,7 +91,62 @@ public abstract class Benchmark {
             mConnection = mDataSource.getConnection();
             return true;
         }
+
+        if ("postgresql".equals(driver)) {
+            PGSimpleDataSource ds = new PGSimpleDataSource();
+
+            ds.setURL(config);
+            mDataSource = ds;
+            mConnection = mDataSource.getConnection();
+            return true;
+        }
+
+        if ("sqlite".equals(driver)) {
+            SQLiteDataSource ds = new SQLiteDataSource();
+            SQLiteConfig sqliteConfig = new SQLiteConfig();
+            sqliteConfig.setJournalMode(SQLiteConfig.JournalMode.WAL);
+            sqliteConfig.setEncoding(SQLiteConfig.Encoding.UTF_8);
+            sqliteConfig.setBusyTimeout(5000);
+            sqliteConfig.setTransactionMode(SQLiteConfig.TransactionMode.EXCLUSIVE);
+            sqliteConfig.setOpenMode(SQLiteOpenMode.READWRITE);
+            sqliteConfig.setOpenMode(SQLiteOpenMode.CREATE);
+            sqliteConfig.setOpenMode(SQLiteOpenMode.FULLMUTEX);
+
+            ds.setConfig(sqliteConfig);
+            ds.setUrl(config);
+            mDataSource = ds;
+            mConnection = mDataSource.getConnection();
+            return true;
+        }
         return false;
+    }
+
+    static void readProcessInfo() {
+        int thread_count = 0;
+        int rss_size = 0;
+        int hwm_size = 0;
+        try {
+            File f = new File("/proc/self/status");
+
+            BufferedReader b = new BufferedReader(new FileReader(f));
+
+            String line;
+            while ((line = b.readLine()) != null) {
+                String[] items = line.split("\\s+");
+                if (line.startsWith("Threads:") && items.length > 0) {
+                    thread_count = Integer.parseInt(items[1]);
+                } else if (line.startsWith("VmRSS:")) {
+                    rss_size = Integer.parseInt(items[1]);
+                } else if (line.startsWith("VmHWM:")) {
+                    hwm_size = Integer.parseInt(items[1]);
+                }
+            }
+        } catch (IOException e) {
+            // Ignore since /proc/self/status is available only under GNU/Linux.
+        }
+        System.out.println("<benchmark language='Java' driver='" + mDriverName
+                + "' threads='" + thread_count + "' rss_size='" + rss_size
+                + "' peek_rss_size='" + hwm_size + "'>");
     }
 
     static String formatTime(long time) {
@@ -109,6 +171,7 @@ public abstract class Benchmark {
     }
 
     static void printReport() {
+        readProcessInfo();
         System.out.println("<measures title='SQL Benchmark'>");
         for (Map.Entry<String, Result> result : mResults.entrySet()) {
             System.out.println("<time count='" + result.getValue().count + "' time='"
@@ -116,6 +179,11 @@ public abstract class Benchmark {
             + formatTime(result.getValue().time) + "' title='" + result.getKey() + "' />");
         }
         System.out.println("</measures>");
+        System.out.println("</benchmark>");
+    }
+
+    public static String getDriverName() {
+        return mDriverName;
     }
 
     Benchmark() {
@@ -146,7 +214,9 @@ public abstract class Benchmark {
         try {
             execute();
         } catch (SQLException ex) {
-
+            System.err.println("SQLException: " + ex.getMessage());
+            System.err.println("SQLState: " + ex.getSQLState());
+            System.err.println("VendorError: " + ex.getErrorCode());
         }
         long end = System.nanoTime();
         mResults.put(mTitle, new Result(mRepeat, end - start));
