@@ -51,6 +51,10 @@ package Sqlbench is
                              Name    : in String) return String
      with Pre => Name'Length > 0;
 
+   --  Get the database driver name.
+   function Get_Driver_Name (Context : in Context_Type) return String
+     with Post => Get_Driver_Name'Result'Length > 0;
+
 private
 
    type Benchmark_Test (Len : Natural) is record
