@@ -59,4 +59,12 @@ package body Sqlbench is
       return Util.Files.Compose ("config", Context.Session.Get_Driver.Get_Driver_Name & "-" & Name);
    end Get_Config_Path;
 
+   --  ------------------------------
+   --  Get the database driver name.
+   --  ------------------------------
+   function Get_Driver_Name (Context : in Context_Type) return String is
+   begin
+      return Context.Session.Get_Driver.Get_Driver_Name;
+   end Get_Driver_Name;
+
 end Sqlbench;
