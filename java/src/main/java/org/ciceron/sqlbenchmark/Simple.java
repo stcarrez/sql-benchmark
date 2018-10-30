@@ -121,24 +121,22 @@ public class Simple {
 
         @Override
         public void execute() throws SQLException {
-            PreparedStatement createStmt = mConnection.prepareStatement(createSQL);
 
             for (int i = 0; i < mRepeat; i++) {
-                PreparedStatement dropStmt = null;
+                Statement dropStmt = null;
                 try {
-                    dropStmt = mConnection.prepareStatement("DROP TABLE test_simple");
-                    dropStmt.execute();
+                    dropStmt = mConnection.createStatement();
+                    dropStmt.execute("DROP TABLE IF EXISTS test_simple");
                 } catch (SQLException ex) {
 
                 }
                 if (dropStmt != null) {
                     dropStmt.close();
                 }
-                if (!createStmt.execute()) {
-                    throw new SQLException("Create table failed");
-                }
+                Statement createStmt = mConnection.createStatement();
+                createStmt.execute(createSQL);
+                createStmt.close();
             }
-            createStmt.close();
         }
     }
 

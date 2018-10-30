@@ -76,9 +76,9 @@ public class Main {
             Benchmark.setBaseRepeat(repeat);
 
         } catch (SQLException ex) {
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
+            System.err.println("SQLException: " + ex.getMessage());
+            System.err.println("SQLState: " + ex.getSQLState());
+            System.err.println("VendorError: " + ex.getErrorCode());
             System.exit(1);
         }
         try {
@@ -87,7 +87,9 @@ public class Main {
             for (Benchmark t : tests) {
                 try {
                     t.run();
+
                 } catch (Exception ex) {
+                    System.err.println("Test " + t.getName() + " failed:");
 
                 }
             }

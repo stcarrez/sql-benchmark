@@ -209,6 +209,10 @@ public abstract class Benchmark {
         return this;
     }
 
+    public String getName() {
+        return mTitle;
+    }
+
     public abstract void execute() throws SQLException;
 
     public void run() {
@@ -218,9 +222,11 @@ public abstract class Benchmark {
         try {
             execute();
         } catch (SQLException ex) {
+            System.err.println("Test " + getName() + " failed:");
             System.err.println("SQLException: " + ex.getMessage());
             System.err.println("SQLState: " + ex.getSQLState());
             System.err.println("VendorError: " + ex.getErrorCode());
+            ex.printStackTrace();
         }
         long end = System.nanoTime();
         mResults.put(mTitle, new Result(mRepeat, end - start));
