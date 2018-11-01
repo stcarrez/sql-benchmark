@@ -18,6 +18,7 @@
 with Ada.Exceptions;
 with Ada.Command_Line;
 with Ada.Text_IO;
+with Ada.Strings.Unbounded;
 
 with Util.Log.Loggers;
 with Util.Measures;
@@ -32,6 +33,8 @@ with ADO.Sessions.Factory;
 with Sqlbench.Simple;
 
 procedure Sqlbench.Main is
+
+   use Ada.Strings.Unbounded;
 
    procedure Read_Line (Line : in String);
 
@@ -68,6 +71,7 @@ procedure Sqlbench.Main is
          null;
    end Read_Line;
 
+   Driver  : Unbounded_String;
    Context : Sqlbench.Context_Type;
 begin
    Util.Log.Loggers.Initialize ("sqlbench.properties");
@@ -75,9 +79,29 @@ begin
    --  Initialize the database drivers.
    ADO.Drivers.Initialize ("sqlbench.properties");
 
+   for I in 1 .. Ada.Command_Line.Argument_Count loop
+      declare
+         Arg : constant String := Ada.Command_Line.Argument (I);
+      begin
+         if Arg = "-sqlite" then
+            Driver := To_Unbounded_String ("sqlite");
+         elsif Arg = "-mysql" then
+            Driver := To_Unbounded_String ("mysql");
+         elsif Arg = "-postgresql" then
+            Driver := To_Unbounded_String ("postgresql");
+         else
+            Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error,
+                                  "Usage: sql-bench [-sqlite] [-mysql] [-postgresql]");
+
+            Ada.Command_Line.Set_Exit_Status (2);
+            return;
+         end if;
+      end;
+   end loop;
+
    --  Initialize the session factory to connect to the
    --  database defined by 'ado.database' property.
-   Context.Factory.Create (ADO.Drivers.Get_Config ("ado.database"));
+   Context.Factory.Create (ADO.Drivers.Get_Config (To_String (Driver) & ".database"));
    Context.Session := Context.Factory.Get_Master_Session;
    Simple.Register (Context);
 
@@ -112,7 +136,8 @@ begin
 
 exception
    when E : ADO.Drivers.Database_Error | ADO.Sessions.Connection_Error =>
-      Ada.Text_IO.Put_Line ("Cannot connect to database: "
+      Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error,
+                            "Cannot connect to database: "
                               & Ada.Exceptions.Exception_Message (E));
       Ada.Command_Line.Set_Exit_Status (1);
 end Sqlbench.Main;
