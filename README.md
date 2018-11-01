@@ -25,3 +25,20 @@ Before running the SQL benchmark of MySQL and PostgreSQL, you must create the
 `sqlbench` database and give access to the `sqlbench` user.
 
 The SQLite database is created automatically.
+
+## Postgresql setup
+
+To create manually the database, you can proceed to the following steps:
+
+1. Create the 'sqlbench' user and configure the password
+(enter 'sqlbench' for the password or update the configuration sqlbench.properties file):
+
+`
+sudo -u postgres createuser sqlbench --pwprompt
+`
+
+2. Create the 'sqlbench' database in Postgresql
+
+`
+sudo -u postgres createdb -O sqlbench sqlbench
+`
