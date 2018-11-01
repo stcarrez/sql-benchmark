@@ -44,7 +44,7 @@ package body Sqlbench.Simple is
    procedure Register (Tests : in out Context_Type) is
       Driver : constant String := Tests.Get_Driver_Name;
    begin
-      if Driver /= "sqlite" then
+      if Driver /= "sqlite" and Driver /= "postgresql" then
          Tests.Register (Do_Static'Access, "DO 1");
       end if;
       Tests.Register (Select_Static'Access, "SELECT 1");
