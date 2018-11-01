@@ -1,5 +1,6 @@
 *.log
 *~
+*/sqlbench.db*
 java/.idea
 java/target
 ado/bin
