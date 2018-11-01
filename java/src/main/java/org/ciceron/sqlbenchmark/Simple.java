@@ -42,7 +42,7 @@ public class Simple {
         createSQL = new String(encoded, StandardCharsets.UTF_8);
 
         if ("sqlite".equals(Benchmark.getDriverName())) {
-            return new Benchmark[]{
+            return new Benchmark[] {
                             new Select_Static(),
                             new Connect_Select_Static(),
                             new Drop_Create(),
@@ -52,7 +52,18 @@ public class Simple {
                             new Select_Table_100()
                     };
         }
-        return new Benchmark[]{
+        if ("postgresql".equals(Benchmark.getDriverName())) {
+            return new Benchmark[] {
+                    new Select_Static(),
+                    new Connect_Select_Static(),
+                    new Drop_Create(),
+                    new Insert(),
+                    new Select_Table_1(),
+                    new Select_Table_10(),
+                    new Select_Table_100()
+            };
+        }
+        return new Benchmark[] {
                 new Do_Static(),
                 new Select_Static(),
                 new Connect_Select_Static(),
