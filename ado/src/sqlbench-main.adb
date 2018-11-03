@@ -71,11 +71,13 @@ procedure Sqlbench.Main is
          null;
    end Read_Line;
 
-   Driver    : Unbounded_String;
-   Context   : Sqlbench.Context_Type;
-   Repeat    : Sqlbench.Repeat_Type := 10;
-   Arg_Pos   : Positive := 1;
-   Arg_Count : constant Natural := Ada.Command_Line.Argument_Count;
+   Driver      : Unbounded_String;
+   Context     : Sqlbench.Context_Type;
+   Repeat      : Sqlbench.Repeat_Type := 100;
+   Output      : Unbounded_String;
+   Output_File : Ada.Text_IO.File_Type;
+   Arg_Pos     : Positive := 1;
+   Arg_Count   : constant Natural := Ada.Command_Line.Argument_Count;
 begin
    Util.Log.Loggers.Initialize ("sqlbench.properties");
 
@@ -95,6 +97,9 @@ begin
          elsif Arg = "-repeat" and Arg_Pos + 1 <= Arg_Count then
             Arg_Pos := Arg_Pos + 1;
             Repeat := Repeat_Type'Value (Ada.Command_Line.Argument (Arg_Pos));
+         elsif Arg = "-o" and Arg_Pos + 1 <= Arg_Count then
+            Arg_Pos := Arg_Pos + 1;
+            Output := To_Unbounded_String (Ada.Command_Line.Argument (Arg_Pos));
          else
             raise Constraint_Error;
          end if;
@@ -103,7 +108,7 @@ begin
          when Constraint_Error =>
             Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error,
                                   "Usage: sql-bench [-sqlite] [-mysql] [-postgresql] "
-                                  & "[-repeat count]");
+                                  & "[-repeat count] [-o output]");
 
             Ada.Command_Line.Set_Exit_Status (2);
             return;
@@ -134,6 +139,10 @@ begin
       when others =>
          null;
    end;
+   if Length (Output) > 0 then
+      Ada.Text_IO.Create (Output_File, Ada.Text_IO.Out_File, To_String (Output));
+      Ada.Text_IO.Set_Output (Output_File);
+   end if;
    Ada.Text_IO.Put ("<benchmark language='Ada' driver='");
    Ada.Text_IO.Put (Context.Get_Driver_Name);
    Ada.Text_IO.Put ("' threads='");
@@ -143,8 +152,10 @@ begin
    Ada.Text_IO.Put ("' peek_rss_size='");
    Ada.Text_IO.Put (Util.Strings.Image (Hwm_Size));
    Ada.Text_IO.Put_Line ("'>");
-   Util.Measures.Write (Context.Perf, "SQL Benchmark", Ada.Text_IO.Standard_Output);
+   Util.Measures.Write (Context.Perf, "SQL Benchmark",
+                        (if Length (Output) > 0 then Output_File else Ada.Text_IO.Standard_Output));
    Ada.Text_IO.Put_Line ("</benchmark>");
+   Ada.Text_IO.Flush;
 
 exception
    when E : ADO.Drivers.Database_Error | ADO.Sessions.Connection_Error =>
