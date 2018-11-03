@@ -17,11 +17,33 @@
 -----------------------------------------------------------------------
 with Ada.Strings.Unbounded;
 with ADO.Statements;
-with ADO.Parameters;
 with Util.Files;
 package body Sqlbench.Simple is
 
    use Ada.Strings.Unbounded;
+
+   generic
+      LIMIT : Positive;
+   procedure Select_Table_N (Context : in out Context_Type);
+
+   procedure Select_Table_N (Context : in out Context_Type) is
+      DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
+      Count : Natural;
+      Stmt  : ADO.Statements.Query_Statement
+        := DB.Create_Statement ("SELECT * FROM test_simple LIMIT " & Positive'Image (LIMIT));
+   begin
+      for I in 1 .. Context.Repeat loop
+         Stmt.Execute;
+         Count := 0;
+         while Stmt.Has_Elements loop
+            Count := Count + 1;
+            Stmt.Next;
+         end loop;
+         if Count /= LIMIT then
+            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
+         end if;
+      end loop;
+   end Select_Table_N;
 
    procedure Do_Static (Context : in out Context_Type);
 
@@ -33,11 +55,15 @@ package body Sqlbench.Simple is
 
    procedure Insert (Context : in out Context_Type);
 
-   procedure Select_Table_1 (Context : in out Context_Type);
+   procedure Select_Table_1 is new Select_Table_N (1);
 
-   procedure Select_Table_10 (Context : in out Context_Type);
+   procedure Select_Table_10 is new Select_Table_N (10);
 
-   procedure Select_Table_100 (Context : in out Context_Type);
+   procedure Select_Table_100 is new Select_Table_N (100);
+
+   procedure Select_Table_500 is new Select_Table_N (500);
+
+   procedure Select_Table_1000 is new Select_Table_N (1000);
 
    Create_SQL : Ada.Strings.Unbounded.Unbounded_String;
 
@@ -54,6 +80,8 @@ package body Sqlbench.Simple is
       Tests.Register (Select_Table_1'Access, "SELECT * FROM table LIMIT 1");
       Tests.Register (Select_Table_10'Access, "SELECT * FROM table LIMIT 10");
       Tests.Register (Select_Table_100'Access, "SELECT * FROM table LIMIT 100");
+      Tests.Register (Select_Table_500'Access, "SELECT * FROM table LIMIT 500");
+      Tests.Register (Select_Table_1000'Access, "SELECT * FROM table LIMIT 1000");
       Util.Files.Read_File (Tests.Get_Config_Path ("create-table.sql"), Create_SQL);
    end Register;
 
@@ -110,63 +138,5 @@ package body Sqlbench.Simple is
          Stmt.Execute;
       end loop;
    end Insert;
-
-   procedure Select_Table_1 (Context : in out Context_Type) is
-      DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
-      Count : Natural;
-      Stmt  : ADO.Statements.Query_Statement
-        := DB.Create_Statement ("SELECT * FROM test_simple LIMIT 1");
-   begin
-      for I in 1 .. Context.Repeat loop
-         Stmt.Execute;
-         Count := 0;
-         while Stmt.Has_Elements loop
-            Count := Count + 1;
-            Stmt.Next;
-         end loop;
-         if Count /= 1 then
-            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
-         end if;
-      end loop;
-   end Select_Table_1;
-
-   procedure Select_Table_10 (Context : in out Context_Type) is
-      DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
-      Count : Natural;
-      Stmt  : ADO.Statements.Query_Statement
-        := DB.Create_Statement ("SELECT * FROM test_simple LIMIT 10");
-   begin
-      for I in 1 .. Context.Repeat loop
-         Stmt.Execute;
-         Count := 0;
-         while Stmt.Has_Elements loop
-            Count := Count + 1;
-            Stmt.Next;
-         end loop;
-         if Count /= 10 then
-            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
-         end if;
-      end loop;
-   end Select_Table_10;
-
-   procedure Select_Table_100 (Context : in out Context_Type) is
-      Name  : constant String := Context.Get_Parameter ("table");
-      DB    : constant ADO.Sessions.Master_Session := Context.Get_Session;
-      Count : Natural;
-      Stmt  : ADO.Statements.Query_Statement
-        := DB.Create_Statement ("SELECT * FROM test_simple LIMIT 100");
-   begin
-      for I in 1 .. Context.Repeat loop
-         Stmt.Execute;
-         Count := 0;
-         while Stmt.Has_Elements loop
-            Count := Count + 1;
-            Stmt.Next;
-         end loop;
-         if Count /= 100 then
-            raise Benchmark_Error with "Invalid result count:" & Natural'Image (Count);
-         end if;
-      end loop;
-   end Select_Table_100;
 
 end Sqlbench.Simple;
