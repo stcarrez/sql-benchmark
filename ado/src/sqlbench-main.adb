@@ -71,17 +71,20 @@ procedure Sqlbench.Main is
          null;
    end Read_Line;
 
-   Driver  : Unbounded_String;
-   Context : Sqlbench.Context_Type;
+   Driver    : Unbounded_String;
+   Context   : Sqlbench.Context_Type;
+   Repeat    : Sqlbench.Repeat_Type := 10;
+   Arg_Pos   : Positive := 1;
+   Arg_Count : constant Natural := Ada.Command_Line.Argument_Count;
 begin
    Util.Log.Loggers.Initialize ("sqlbench.properties");
 
    --  Initialize the database drivers.
    ADO.Drivers.Initialize ("sqlbench.properties");
 
-   for I in 1 .. Ada.Command_Line.Argument_Count loop
+   while Arg_Pos <= Arg_Count loop
       declare
-         Arg : constant String := Ada.Command_Line.Argument (I);
+         Arg : constant String := Ada.Command_Line.Argument (Arg_Pos);
       begin
          if Arg = "-sqlite" then
             Driver := To_Unbounded_String ("sqlite");
@@ -89,14 +92,23 @@ begin
             Driver := To_Unbounded_String ("mysql");
          elsif Arg = "-postgresql" then
             Driver := To_Unbounded_String ("postgresql");
+         elsif Arg = "-repeat" and Arg_Pos + 1 <= Arg_Count then
+            Arg_Pos := Arg_Pos + 1;
+            Repeat := Repeat_Type'Value (Ada.Command_Line.Argument (Arg_Pos));
          else
+            raise Constraint_Error;
+         end if;
+
+      exception
+         when Constraint_Error =>
             Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error,
-                                  "Usage: sql-bench [-sqlite] [-mysql] [-postgresql]");
+                                  "Usage: sql-bench [-sqlite] [-mysql] [-postgresql] "
+                                  & "[-repeat count]");
 
             Ada.Command_Line.Set_Exit_Status (2);
             return;
-         end if;
       end;
+      Arg_Pos := Arg_Pos + 1;
    end loop;
 
    --  Initialize the session factory to connect to the
@@ -106,7 +118,7 @@ begin
    Simple.Register (Context);
 
    for Test of Context.Tests loop
-      Context.Repeat := 10 * Test.Factor;
+      Context.Repeat := Repeat * Test.Factor;
       declare
          T : Util.Measures.Stamp;
       begin
