@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -174,7 +175,11 @@ public abstract class Benchmark {
         }
     }
 
-    static void printReport() {
+    static void printReport(String output) throws IOException {
+        if (output.length() > 0) {
+            PrintStream o = new PrintStream(new File(output));
+            System.setOut(o);
+        }
         readProcessInfo();
         System.out.println("<measures title='SQL Benchmark'>");
         for (Map.Entry<String, Result> result : mResults.entrySet()) {
