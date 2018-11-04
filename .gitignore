@@ -9,4 +9,7 @@ ado/autom4te.cache
 ado/config.status
 ado/Makefile
 ado/sqlbench.gpr
+tools/tool.gpr
+tools/Makefile
+tools/config.status
 
