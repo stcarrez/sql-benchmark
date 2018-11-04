@@ -28,12 +28,14 @@ import java.sql.SQLException;
 public class Main {
 
     private static void Usage() {
-        System.err.println("Usage: java -jar sql-benchmark.jar [-sqlite|-mysql|-postgresql] [-repeat N]");
+        System.err.println("Usage: java -jar sql-benchmark.jar [-sqlite|-mysql|-postgresql] [-repeat N] "
+                + "[-o file]");
         System.exit(2);
     }
 
     public static void main(String[] args) {
         String driver = "sqlite";
+        String output = "";
 
         long repeat = 10;
         for (int i = 0; i < args.length; i++) {
@@ -55,6 +57,14 @@ public class Main {
                     System.err.println("Repeat count is not a number");
                     Usage();
                 }
+            } else if ("-o".equals(args[i])) {
+                i++;
+                if (i == args.length) {
+                    System.err.println("Missing argument to -repeat option");
+                    Usage();
+                }
+                output = args[i];
+
             } else {
                 Usage();
             }
@@ -98,6 +108,11 @@ public class Main {
             System.err.println(e);
         }
 
-        Benchmark.printReport();
+        try {
+            Benchmark.printReport(output);
+        } catch (IOException ex) {
+            System.err.println(ex);
+            System.exit(1);
+        }
     }
 }
