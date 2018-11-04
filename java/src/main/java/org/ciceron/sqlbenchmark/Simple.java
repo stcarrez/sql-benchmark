@@ -42,15 +42,17 @@ public class Simple {
         createSQL = new String(encoded, StandardCharsets.UTF_8);
 
         if ("sqlite".equals(Benchmark.getDriverName())) {
-            return new Benchmark[] {
-                            new Select_Static(),
-                            new Connect_Select_Static(),
-                            new Drop_Create(),
-                            new Insert(),
-                            new Select_Table_1(),
-                            new Select_Table_10(),
-                            new Select_Table_100()
-                    };
+            return new Benchmark[]{
+                    new Select_Static(),
+                    new Connect_Select_Static(),
+                    new Drop_Create(),
+                    new Insert(),
+                    new Select_Table(1),
+                    new Select_Table(10),
+                    new Select_Table(100),
+                    new Select_Table(500),
+                    new Select_Table(1000)
+            };
         }
         if ("postgresql".equals(Benchmark.getDriverName())) {
             return new Benchmark[] {
@@ -58,9 +60,11 @@ public class Simple {
                     new Connect_Select_Static(),
                     new Drop_Create(),
                     new Insert(),
-                    new Select_Table_1(),
-                    new Select_Table_10(),
-                    new Select_Table_100()
+                    new Select_Table(1),
+                    new Select_Table(10),
+                    new Select_Table(100),
+                    new Select_Table(500),
+                    new Select_Table(1000)
             };
         }
         return new Benchmark[] {
@@ -69,9 +73,11 @@ public class Simple {
                 new Connect_Select_Static(),
                 new Drop_Create(),
                 new Insert(),
-                new Select_Table_1(),
-                new Select_Table_10(),
-                new Select_Table_100()
+                new Select_Table(1),
+                new Select_Table(10),
+                new Select_Table(100),
+                new Select_Table(500),
+                new Select_Table(1000)
         };
     }
 
@@ -168,15 +174,18 @@ public class Simple {
         }
     }
 
-    private static class Select_Table_1 extends Benchmark {
-        Select_Table_1() {
-            super("SELECT * FROM test_simple LIMIT 1");
+    private static class Select_Table extends Benchmark {
+        private final int mExpectCount;
+
+        Select_Table(int count) {
+            super("SELECT * FROM table LIMIT " + count);
+            mExpectCount = count;
         }
 
         @Override
         public void execute() throws SQLException {
             PreparedStatement stmt
-                    = mConnection.prepareStatement("SELECT * FROM test_simple LIMIT 1");
+                    = mConnection.prepareStatement("SELECT * FROM test_simple LIMIT " + mExpectCount);
 
             for (int i = 0; i < mRepeat; i++) {
                 if (stmt.execute()) {
@@ -186,65 +195,7 @@ public class Simple {
                         count++;
                     }
                     rs.close();
-                    if (count != 1) {
-                        throw new SQLException("Invalid result count: " + count);
-                    }
-                } else {
-                    throw new SQLException("No result");
-                }
-            }
-            stmt.close();
-        }
-    }
-
-    private static class Select_Table_10 extends Benchmark {
-        Select_Table_10() {
-            super("SELECT * FROM test_simple LIMIT 10");
-        }
-
-        @Override
-        public void execute() throws SQLException {
-            PreparedStatement stmt
-                    = mConnection.prepareStatement("SELECT * FROM test_simple LIMIT 10");
-
-            for (int i = 0; i < mRepeat; i++) {
-                if (stmt.execute()) {
-                    ResultSet rs = stmt.getResultSet();
-                    int count = 0;
-                    while (rs.next()) {
-                        count++;
-                    }
-                    rs.close();
-                    if (count != 10) {
-                        throw new SQLException("Invalid result count: " + count);
-                    }
-                } else {
-                    throw new SQLException("No result");
-                }
-            }
-            stmt.close();
-        }
-    }
-
-    private static class Select_Table_100 extends Benchmark {
-        Select_Table_100() {
-            super("SELECT * FROM test_simple LIMIT 100");
-        }
-
-        @Override
-        public void execute() throws SQLException {
-            PreparedStatement stmt
-                    = mConnection.prepareStatement("SELECT * FROM test_simple LIMIT 100");
-
-            for (int i = 0; i < mRepeat; i++) {
-                if (stmt.execute()) {
-                    ResultSet rs = stmt.getResultSet();
-                    int count = 0;
-                    while (rs.next()) {
-                        count++;
-                    }
-                    rs.close();
-                    if (count != 100) {
+                    if (count != mExpectCount) {
                         throw new SQLException("Invalid result count: " + count);
                     }
                 } else {
