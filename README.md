@@ -12,6 +12,7 @@ languages and SQL databases.  Some of the goals are:
 
 * [Java Benchmark](https://github.com/stcarrez/sql-benchmark/tree/master/java)
 * [Ada Benchmark](https://github.com/stcarrez/sql-benchmark/tree/master/ado)
+* [Python Benchmark](https://github.com/stcarrez/sql-benchmark/tree/master/python)
 
 # Databases
 
