@@ -4,6 +4,7 @@ Benchmark class
 """
 __author__ = "Stephane Carrez"
 __copyright__ = "Copyright (C) 2018 Stephane Carrez"
+__license__ = 'Apache License, Version 2.0'
 
 import time
 import traceback
