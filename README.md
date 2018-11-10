@@ -48,70 +48,80 @@ sudo -u postgres createdb -O sqlbench sqlbench
 
 ## CONNECT; SELECT 1; CLOSE
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  272.1 us     |  5.509 ms     |  22.73 us     |
-| Java                  |  944.4 us     |  9.926 ms     |  197.9 us     |
+| Ada                   |  21.93 us     |  331.5 us     |  6.220 ms     |
+| Java                  |  194.4 us     |  853.4 us     |  11.69 ms     |
+| Python                |  45.04 us     |  256.3 us     |  1.503 ms     |
 
 ## DO 1
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  33.46 us     |               |               |
-| Java                  |  63.05 us     |               |               |
+| Ada                   |               |  33.32 us     |               |
+| Java                  |               |  70.34 us     |               |
+| Python                |               |               |               |
 
 ## DROP table; CREATE table
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  509.8 ms     |  75.13 ms     |  219.6 us     |
-| Java                  |  542.5 ms     |  68.13 ms     |  2.920 ms     |
+| Ada                   |  222.0 us     |  498.8 ms     |  68.58 ms     |
+| Java                  |  413.8 us     |  535.3 ms     |  70.16 ms     |
+| Python                |  1.452 ms     |  464.5 us     |  248.8 us     |
 
 ## INSERT INTO table
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  52.40 ms     |  11.71 ms     |  73.83 us     |
-| Java                  |  49.98 ms     |  12.03 ms     |  146.3 us     |
+| Ada                   |  73.25 us     |  48.65 ms     |  11.82 ms     |
+| Java                  |  19.43 us     |  48.52 ms     |  12.10 ms     |
+| Python                |  7.481 us     |  206.7 us     |  24.21 us     |
 
 ## SELECT * FROM table LIMIT 1
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  25.93 us     |  125.4 us     |  27.63 us     |
-| Java                  |  60.28 us     |  87.43 us     |  4.969 us     |
+| Ada                   |  28.30 us     |  38.61 us     |  152.3 us     |
+| Java                  |  4.839 us     |  57.37 us     |  108.6 us     |
+| Python                |  3.813 us     |  34.89 us     |  57.17 us     |
 
 ## SELECT * FROM table LIMIT 10
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  41.82 us     |  132.5 us     |  28.97 us     |
-| Java                  |  66.07 us     |  113.4 us     |  5.098 us     |
+| Ada                   |  29.05 us     |  31.32 us     |  169.9 us     |
+| Java                  |  5.124 us     |  65.35 us     |  125.6 us     |
+| Python                |  8.785 us     |  49.59 us     |  67.11 us     |
 
 ## SELECT * FROM table LIMIT 100
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  48.02 us     |  205.8 us     |  40.56 us     |
-| Java                  |  66.92 us     |  209.6 us     |  15.48 us     |
+| Ada                   |  38.11 us     |  41.10 us     |  215.3 us     |
+| Java                  |  15.53 us     |  81.90 us     |  239.3 us     |
+| Python                |  61.34 us     |  92.83 us     |  99.48 us     |
 
 ## SELECT * FROM table LIMIT 500
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  96.71 us     |  346.4 us     |  86.12 us     |
-| Java                  |  157.2 us     |  572.8 us     |  63.20 us     |
+| Ada                   |  79.16 us     |  82.77 us     |  381.6 us     |
+| Java                  |  63.18 us     |  143.8 us     |  634.6 us     |
+| Python                |  301.4 us     |  278.7 us     |  250.8 us     |
 
 ## SELECT * FROM table LIMIT 1000
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  144.9 us     |  483.8 us     |  147.4 us     |
-| Java                  |  242.7 us     |  838.1 us     |  123.8 us     |
+| Ada                   |  128.9 us     |  148.7 us     |  504.5 us     |
+| Java                  |  122.2 us     |  226.6 us     |  896.2 us     |
+| Python                |  598.8 us     |  522.5 us     |  440.0 us     |
 
 ## SELECT 1
 
-|                       | mysql         | postgresql    | sqlite        |
+|                       | sqlite        | mysql         | postgresql    |
 |-----------------------|---------------|---------------|---------------|
-| Ada                   |  36.51 us     |  75.34 us     |  9.514 us     |
-| Java                  |  63.43 us     |  106.1 us     |  5.483 us     |
+| Ada                   |  9.477 us     |  45.89 us     |  119.8 us     |
+| Java                  |  6.437 us     |  59.68 us     |  136.8 us     |
+| Python                |  1.654 us     |  30.16 us     |  54.28 us     |
