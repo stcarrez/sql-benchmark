@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""
+SQLite Benchmark tests
+"""
+__author__ = "Stephane Carrez"
+__copyright__ = "Copyright (C) 2018 Stephane Carrez"
+
+import sqlite3
+import sqlite_benchmark
+
+class SelectStatic(sqlite_benchmark.SQLiteBenchmark):
+    def __init__(self):
+        super().__init__()
+        self.title = "SELECT 1"
+
+    def execute(self):
+        repeat = self.repeat()
+        db = self.connection()
+        stmt = db.cursor()
+    
+        for i in range(0, repeat):
+            stmt.execute("SELECT 1")
+
+class ConnectSelectStatic(sqlite_benchmark.SQLiteBenchmark):
+    def __init__(self):
+        super().__init__()
+        self.title = "CONNECT; SELECT 1; CLOSE"
+
+    def execute(self):
+        repeat = self.repeat()
+    
+        for i in range(0, repeat):
+            db = self.newConnection()
+            stmt = db.cursor()
+            stmt.execute("SELECT 1")
+            db.close()
+
+class DropCreate(sqlite_benchmark.SQLiteBenchmark):
+    def __init__(self):
+        super().__init__()
+        self.title = "DROP table; CREATE table"
+        self.repeat_factor = 1
+        with open('config/sqlite-create-table.sql') as f:
+            self.create_sql = f.read()
+
+    def execute(self):
+        repeat = self.repeat()
+        db = self.connection()
+    
+        for i in range(0, repeat):
+            stmt = db.cursor()
+            try:
+                stmt.execute("DROP TABLE test_simple")
+            except:
+                pass
+
+            stmt.execute(self.create_sql)
+
+class Insert(sqlite_benchmark.SQLiteBenchmark):
+    def __init__(self):
+        super().__init__()
+        self.title = "INSERT INTO table"
+        self.repeat_factor = 10
+
+    def execute(self):
+        repeat = self.repeat()
+        db = self.connection()
+        stmt = db.cursor()
+
+        for i in range(0, repeat):
+            stmt.execute("INSERT INTO test_simple (value) VALUES (1)")
+
+class SelectTable(sqlite_benchmark.SQLiteBenchmark):
+    def __init__(self, count):
+        super().__init__()
+        self.title = "SELECT * FROM table LIMIT " + str(count)
+        self.sql = "SELECT * FROM test_simple LIMIT " + str(count)
+        self.expect_count = count
+
+    def execute(self):
+        repeat = self.repeat()
+        db = self.connection()
+        stmt = db.cursor()
+
+        for i in range(0, repeat):
+            stmt.execute(self.sql)
+            row_count = 0
+            for row in stmt:
+                row_count = row_count + 1
+
+            if row_count != self.expect_count:
+                raise Exception('Invalid result count:' + str(row_count))
+
+def create():
+    s = SelectStatic()
+    return [SelectStatic(), ConnectSelectStatic(), DropCreate(), Insert(),
+            SelectTable(1), SelectTable(10), SelectTable(100), SelectTable(1000)]
+
