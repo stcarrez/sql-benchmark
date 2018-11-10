@@ -1,4 +1,5 @@
 *.log
+*.xml
 *~
 */sqlbench.db*
 java/.idea
@@ -10,6 +11,10 @@ ado/config.status
 ado/Makefile
 ado/sqlbench.gpr
 tools/tool.gpr
+tools/bin
+tools/obj
 tools/Makefile
 tools/config.status
-
+tools/autom4te.cache
+python/src/__pycache__
+        
