@@ -1,7 +1,7 @@
 #!/bin/sh
 
 REPEAT=100
-LANGUAGES="ado java"
+LANGUAGES="ado java python"
 DATABASES="sqlite mysql postgresql"
 
 # Check SQL benchmark programs are built.
@@ -21,6 +21,9 @@ for L in $LANGUAGES; do
          echo "cd java && mvn compile assembly:single"
          exit 2
       fi
+      ;;
+
+    python)
       ;;
 
     *)
@@ -58,6 +61,15 @@ for D in $DATABASES; do
 
        java)
          cd $DIR/java && java -jar target/sql-benchmark-1.0.jar -$D -repeat $REPEAT -o ../results/$L-$D.xml
+         if test $? -ne 0; then
+            echo "Execution of SQL benchmark on $D for $L failed"
+            FAIL=1
+         fi
+         FILES="$FILES results/$L-$D.xml"
+         ;;
+
+       python)
+         cd $DIR/python && python3 src -$D -repeat $REPEAT -o ../results/$L-$D.xml
          if test $? -ne 0; then
             echo "Execution of SQL benchmark on $D for $L failed"
             FAIL=1
