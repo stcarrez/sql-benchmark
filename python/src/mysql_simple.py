@@ -52,10 +52,12 @@ class DropCreate(mysql_benchmark.MysqlBenchmark):
             stmt = db.cursor()
             try:
                 stmt.execute("DROP TABLE test_simple")
+                db.commit()
             except:
                 pass
 
             stmt.execute(self.create_sql)
+            db.commit()
 
 class Insert(mysql_benchmark.MysqlBenchmark):
     def __init__(self):
@@ -66,10 +68,11 @@ class Insert(mysql_benchmark.MysqlBenchmark):
     def execute(self):
         repeat = self.repeat()
         db = self.connection()
-        stmt = db.cursor()
 
         for i in range(0, repeat):
+            stmt = db.cursor()
             stmt.execute("INSERT INTO test_simple (value) VALUES (1)")
+            db.commit()
 
 class SelectTable(mysql_benchmark.MysqlBenchmark):
     def __init__(self, count):
@@ -95,5 +98,5 @@ class SelectTable(mysql_benchmark.MysqlBenchmark):
 def create():
     s = SelectStatic()
     return [SelectStatic(), ConnectSelectStatic(), DropCreate(), Insert(),
-            SelectTable(1), SelectTable(10), SelectTable(100), SelectTable(1000)]
+            SelectTable(1), SelectTable(10), SelectTable(100), SelectTable(500), SelectTable(1000)]
 

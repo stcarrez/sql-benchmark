@@ -95,5 +95,5 @@ class SelectTable(postgresql_benchmark.PostgreSQLBenchmark):
 def create():
     s = SelectStatic()
     return [SelectStatic(), ConnectSelectStatic(), DropCreate(), Insert(),
-            SelectTable(1), SelectTable(10), SelectTable(100), SelectTable(1000)]
+            SelectTable(1), SelectTable(10), SelectTable(100), SelectTable(500), SelectTable(1000)]
 

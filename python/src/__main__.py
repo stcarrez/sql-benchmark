@@ -17,7 +17,7 @@ import mysql_simple
 import sys
 
 parser = argparse.ArgumentParser(description='SQL Benchmark')
-parser.add_argument('-r', dest='repeat', help='Repeat counter', type=int)
+parser.add_argument('-repeat', dest='repeat', help='Repeat counter', type=int)
 parser.add_argument('-sqlite', help='Run the SQLite benchmarks', action="store_true")
 parser.add_argument('-postgresql', help='Run the PostgreSQL benchmarks', action="store_true")
 parser.add_argument('-mysql', help='Run the Mysql benchmarks', action="store_true")
