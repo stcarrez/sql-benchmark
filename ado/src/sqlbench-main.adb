@@ -29,6 +29,7 @@ with ADO;
 with ADO.Drivers;
 with ADO.Sessions;
 with ADO.Sessions.Factory;
+with ADO.Statements;
 
 with Sqlbench.Simple;
 
@@ -85,10 +86,10 @@ procedure Sqlbench.Main is
          exit when Pos = 0;
       end loop;
       Next := Util.Strings.Index (Line, ' ', Pos + 1);
-      User_Time := Natural'Value (Line (Pos + 1 .. Next - 1));
+      User_Time := 10 * Natural'Value (Line (Pos + 1 .. Next - 1));
       Pos := Next;
       Next := Util.Strings.Index (Line, ' ', Pos + 1);
-      Sys_Time := Natural'Value (Line (Pos + 1 .. Next - 1));
+      Sys_Time := 10 * Natural'Value (Line (Pos + 1 .. Next - 1));
 
    exception
       when Constraint_Error =>
@@ -145,6 +146,10 @@ begin
    Context.Factory.Create (ADO.Drivers.Get_Config (To_String (Driver) & ".database"));
    Context.Session := Context.Factory.Get_Master_Session;
    Simple.Register (Context);
+
+   if Driver = "postgresql" then
+      Context.Session.Begin_Transaction;
+   end if;
 
    for Test of Context.Tests loop
       Context.Repeat := Repeat * Test.Factor;
