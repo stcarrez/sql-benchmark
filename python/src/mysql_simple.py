@@ -9,6 +9,20 @@ __license__ = 'Apache License, Version 2.0'
 import MySQLdb
 import mysql_benchmark
 
+class DoStatic(mysql_benchmark.MysqlBenchmark):
+    def __init__(self):
+        super().__init__()
+        self.title = "DO 1"
+
+    def execute(self):
+        repeat = self.repeat()
+        db = self.connection()
+        stmt = db.cursor()
+    
+        for i in range(0, repeat):
+            stmt.execute("DO 1")
+        stmt.close()
+
 class SelectStatic(mysql_benchmark.MysqlBenchmark):
     def __init__(self):
         super().__init__()
@@ -21,6 +35,7 @@ class SelectStatic(mysql_benchmark.MysqlBenchmark):
     
         for i in range(0, repeat):
             stmt.execute("SELECT 1")
+        stmt.close()
 
 class ConnectSelectStatic(mysql_benchmark.MysqlBenchmark):
     def __init__(self):
@@ -34,6 +49,7 @@ class ConnectSelectStatic(mysql_benchmark.MysqlBenchmark):
             db = self.newConnection()
             stmt = db.cursor()
             stmt.execute("SELECT 1")
+            stmt.close()
             db.close()
 
 class DropCreate(mysql_benchmark.MysqlBenchmark):
@@ -47,17 +63,21 @@ class DropCreate(mysql_benchmark.MysqlBenchmark):
     def execute(self):
         repeat = self.repeat()
         db = self.connection()
+        drop_stmt = db.cursor()
+        create_stmt = db.cursor()
     
         for i in range(0, repeat):
-            stmt = db.cursor()
             try:
-                stmt.execute("DROP TABLE test_simple")
+                drop_stmt.execute("DROP TABLE test_simple")
                 db.commit()
             except:
                 pass
 
-            stmt.execute(self.create_sql)
+            create_stmt.execute(self.create_sql)
             db.commit()
+
+        drop_stmt.close()
+        create_stmt.close()
 
 class Insert(mysql_benchmark.MysqlBenchmark):
     def __init__(self):
@@ -68,11 +88,13 @@ class Insert(mysql_benchmark.MysqlBenchmark):
     def execute(self):
         repeat = self.repeat()
         db = self.connection()
+        stmt = db.cursor()
 
         for i in range(0, repeat):
-            stmt = db.cursor()
             stmt.execute("INSERT INTO test_simple (value) VALUES (1)")
-            db.commit()
+
+        stmt.close()
+        db.commit()
 
 class SelectTable(mysql_benchmark.MysqlBenchmark):
     def __init__(self, count):
@@ -95,8 +117,10 @@ class SelectTable(mysql_benchmark.MysqlBenchmark):
             if row_count != self.expect_count:
                 raise Exception('Invalid result count:' + str(row_count))
 
+        stmt.close()
+
 def create():
     s = SelectStatic()
-    return [SelectStatic(), ConnectSelectStatic(), DropCreate(), Insert(),
+    return [DoStatic(), SelectStatic(), ConnectSelectStatic(), DropCreate(), Insert(),
             SelectTable(1), SelectTable(10), SelectTable(100), SelectTable(500), SelectTable(1000)]
 
