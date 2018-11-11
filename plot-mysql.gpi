@@ -1,0 +1,15 @@
+set fit quiet
+reset
+set terminal pngcairo background "#ffffff" enhanced font "arial,16" fontscale 1.0 size 800,500
+#set output benchmark.png
+set title textcolor rgb "blue" "MySQL: SELECT * FROM table LIMIT x"
+set ylabel "Time (us)"
+set xlabel ""
+set key below
+set style fill transparent solid 0.10 noborder
+plot \
+     "perf.dat" using 1:5 title "Java" with filledcurves x1 lc rgb "#85cbcf" fs transparent solid 1.0, \
+     "perf.dat" using 1:2 title "Ada" with filledcurves x1 lc rgb "#3984b6" fs transparent solid 1.0, \
+     "perf.dat" using 1:8 title "Python" with filledcurves x1 lc rgb "#1d2e81" fs transparent solid 1.0
+     
+     
