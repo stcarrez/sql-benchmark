@@ -94,6 +94,7 @@ public abstract class Benchmark {
             ds.setURL(config);
             mDataSource = ds;
             mConnection = mDataSource.getConnection();
+            mConnection.setAutoCommit(false);
             return true;
         }
 
@@ -130,6 +131,8 @@ public abstract class Benchmark {
         int thread_count = 0;
         int rss_size = 0;
         int hwm_size = 0;
+        int user_time = 0;
+        int sys_time = 0;
         try {
             File f = new File("/proc/self/status");
 
@@ -149,9 +152,27 @@ public abstract class Benchmark {
         } catch (IOException e) {
             // Ignore since /proc/self/status is available only under GNU/Linux.
         }
+        try {
+            File f = new File("/proc/self/stat");
+
+            BufferedReader b = new BufferedReader(new FileReader(f));
+
+            String line;
+            while ((line = b.readLine()) != null) {
+                String[] items = line.split("\\s+");
+                if (items.length > 14) {
+                    user_time = Integer.parseInt(items[13]);
+                    sys_time = Integer.parseInt(items[14]);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            // Ignore since /proc/self/stat is available only under GNU/Linux.
+        }
         System.out.println("<benchmark language='Java' driver='" + mDriverName
                 + "' threads='" + thread_count + "' rss_size='" + rss_size
-                + "' peek_rss_size='" + hwm_size + "'>");
+                + "' peek_rss_size='" + hwm_size + "' user_time='" + user_time
+                + "' sys_time='" + sys_time + "'>");
     }
 
     static String formatTime(long time) {
