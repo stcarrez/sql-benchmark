@@ -8,8 +8,8 @@ set xlabel ""
 set key below
 set style fill transparent solid 0.10 noborder
 plot \
-     "perf.dat" using 1:6 title "Java" with filledcurves x1 lc rgb "#85cbcf" fs transparent solid 1.0, \
      "perf.dat" using 1:9 title "Python" with filledcurves x1 lc rgb "#1d2e81" fs transparent solid 1.0, \
+     "perf.dat" using 1:6 title "Java" with filledcurves x1 lc rgb "#85cbcf" fs transparent solid 1.0, \
      "perf.dat" using 1:3 title "Ada" with filledcurves x1 lc rgb "#3984b6" fs transparent solid 1.0
      
      
