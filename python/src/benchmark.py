@@ -82,8 +82,8 @@ class Benchmark:
                     line = line.strip()
                     items = line.split()
                     if len(items) > 17:
-                        user_time = items[13]
-                        sys_time = items[14]
+                        user_time = 10 * int(items[13])
+                        sys_time = 10 * int(items[14])
         except:
             pass
 
