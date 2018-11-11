@@ -31,6 +31,7 @@ begin
    end loop;
 
    Tool.Data.Save ("result.dat");
+   Tool.Data.Save ("memory.dat", "Ada,Python,Java");
    Tool.Data.Save_Excel ("result.xls");
 
 exception
