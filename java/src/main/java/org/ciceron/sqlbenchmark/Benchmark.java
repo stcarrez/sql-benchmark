@@ -104,6 +104,7 @@ public abstract class Benchmark {
             ds.setURL(config);
             mDataSource = ds;
             mConnection = mDataSource.getConnection();
+            mConnection.setAutoCommit(false);
             return true;
         }
 
