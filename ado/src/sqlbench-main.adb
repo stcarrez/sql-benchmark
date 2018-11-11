@@ -37,12 +37,15 @@ procedure Sqlbench.Main is
    use Ada.Strings.Unbounded;
 
    procedure Read_Line (Line : in String);
+   procedure Read_Stat_Line (Line : in String);
 
    Log     : constant Util.Log.Loggers.Logger := Util.Log.Loggers.Create ("Sqlbench.Main");
 
    Thread_Count : Natural := 0;
    Rss_Size     : Natural := 0;
    Hwm_Size     : Natural := 0;
+   User_Time    : Natural := 0;
+   Sys_Time     : Natural := 0;
 
    procedure Read_Line (Line : in String) is
       Pos  : Natural := Util.Strings.Index (Line, ASCII.HT);
@@ -70,6 +73,27 @@ procedure Sqlbench.Main is
       when Constraint_Error =>
          null;
    end Read_Line;
+
+   procedure Read_Stat_Line (Line : in String) is
+      Pos  : Natural := Line'First;
+      Next : Natural;
+   begin
+      Log.Debug ("{0}", Line);
+
+      for I in 1 .. 13 loop
+         Pos := Util.Strings.Index (Line, ' ', Pos + 1);
+         exit when Pos = 0;
+      end loop;
+      Next := Util.Strings.Index (Line, ' ', Pos + 1);
+      User_Time := Natural'Value (Line (Pos + 1 .. Next - 1));
+      Pos := Next;
+      Next := Util.Strings.Index (Line, ' ', Pos + 1);
+      Sys_Time := Natural'Value (Line (Pos + 1 .. Next - 1));
+
+   exception
+      when Constraint_Error =>
+         null;
+   end Read_Stat_Line;
 
    Driver      : Unbounded_String;
    Context     : Sqlbench.Context_Type;
@@ -129,11 +153,23 @@ begin
       begin
          Test.Handler (Context);
          Util.Measures.Report (Context.Perf, T, Test.Title, Positive (Context.Repeat));
+
+      exception
+         when others =>
+            null;
       end;
    end loop;
 
    begin
       Util.Files.Read_File (Path => "/proc/self/status", Process => Read_Line'Access);
+
+   exception
+      when others =>
+         null;
+   end;
+
+   begin
+      Util.Files.Read_File (Path => "/proc/self/stat", Process => Read_Stat_Line'Access);
 
    exception
       when others =>
@@ -151,6 +187,10 @@ begin
    Ada.Text_IO.Put (Util.Strings.Image (Rss_Size));
    Ada.Text_IO.Put ("' peek_rss_size='");
    Ada.Text_IO.Put (Util.Strings.Image (Hwm_Size));
+   Ada.Text_IO.Put ("' user_time='");
+   Ada.Text_IO.Put (Util.Strings.Image (User_Time));
+   Ada.Text_IO.Put ("' sys_time='");
+   Ada.Text_IO.Put (Util.Strings.Image (Sys_Time));
    Ada.Text_IO.Put_Line ("'>");
    Util.Measures.Write (Context.Perf, "SQL Benchmark",
                         (if Length (Output) > 0 then Output_File else Ada.Text_IO.Standard_Output));
