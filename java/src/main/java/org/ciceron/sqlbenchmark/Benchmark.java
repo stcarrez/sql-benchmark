@@ -162,8 +162,8 @@ public abstract class Benchmark {
             while ((line = b.readLine()) != null) {
                 String[] items = line.split("\\s+");
                 if (items.length > 14) {
-                    user_time = Integer.parseInt(items[13]);
-                    sys_time = Integer.parseInt(items[14]);
+                    user_time = 10 * Integer.parseInt(items[13]);
+                    sys_time = 10 * Integer.parseInt(items[14]);
                     break;
                 }
             }
