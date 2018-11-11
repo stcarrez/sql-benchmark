@@ -60,6 +60,8 @@ class Benchmark:
         thread_count = 0
         rss_size = 0
         hwm_size = 0
+        sys_time = 0
+        user_time = 0
         try:
             with open("/proc/self/status") as f:
                 for line in f:
@@ -73,7 +75,23 @@ class Benchmark:
                         hwm_size = int(items[1])
         except:
             pass
-        print("<benchmark language='Python' driver='{0}' threads='{1}' rss_size='{2}' peek_rss_size='{3}'>".format(Benchmark._driver, thread_count, rss_size, hwm_size))
+
+        try:
+            with open("/proc/self/stat") as f:
+                for line in f:
+                    line = line.strip()
+                    items = line.split()
+                    if len(items) > 17:
+                        user_time = items[13]
+                        sys_time = items[14]
+        except:
+            pass
+
+        print("<benchmark language='Python'", end='')
+        print(" driver='{0}' threads='{1}'".format(Benchmark._driver, thread_count), end='')
+        print(" rss_size='{0}' peek_rss_size='{1}'".format(rss_size, hwm_size), end='')
+        print(" user_time='{0}' sys_time='{1}'".format(user_time, sys_time), end='')
+        print(">")
 
     @staticmethod
     def format_time(t):
@@ -112,7 +130,7 @@ class Benchmark:
     def run(self):
         repeat = self.repeat()
         
-        start = time.clock()
+        start = time.time()
         try:
             self.execute()
         except Exception as ex:
@@ -120,8 +138,9 @@ class Benchmark:
             print(ex)
             traceback.print_exc()
 
-        end = time.clock()
-        Benchmark._results[self.title] = { 'repeat': repeat, 'time': end - start }
+        end = time.time()
+        dt = end - start
+        Benchmark._results[self.title] = { 'repeat': repeat, 'time': dt }
 
 
 
