@@ -17,12 +17,16 @@
 -----------------------------------------------------------------------
 with Ada.Text_IO;
 with Util.Strings;
+with Util.Log.Loggers;
 with Util.Serialize.IO.XML;
+with Util.Strings.Tokenizers;
 with Excel_Out;
 package body Tool.Data is
 
    use type Ada.Containers.Count_Type;
    use type Ada.Text_IO.Positive_Count;
+
+   Log     : constant Util.Log.Loggers.Logger := Util.Log.Loggers.Create ("Tool.Data");
 
    function Parse_Time (Value : in String) return Duration;
    function Get_Title (Value : in String) return String;
@@ -114,7 +118,23 @@ package body Tool.Data is
       Language   : constant String := UBO.To_String (Benchmark.Language);
       Pos        : Driver_Cursor := Benchmark.Drivers.Find (Language & " " & Database);
       New_Driver : Driver_Result;
+
+      procedure Update_Driver (Key : in String;
+                               Driver : in out Driver_Result) is
+      begin
+         Driver.Count := Driver.Count + 1;
+         Driver.Rss_Size := Driver.Rss_Size + Benchmark.Rss_Size;
+         Driver.Peek_Rss := Driver.Peek_Rss + Benchmark.Peek_Rss_Size;
+         Driver.Thread_Count := Driver.Thread_Count + Benchmark.Thread_Count;
+         Driver.User_Time := Driver.User_Time + Benchmark.User_Time;
+         Driver.Sys_Time := Driver.Sys_Time + Benchmark.Sys_Time;
+         Driver.Language := Benchmark.Language_Index;
+         Driver.Database := Benchmark.Database_Index;
+         Driver.Index := Benchmark.Driver_Index;
+      end Update_Driver;
+
    begin
+      Log.Debug ("Adding driver {0} {1}", Language, Database);
       if UBO.Is_Null (Benchmark.Driver) or else UBO.Is_Null (Benchmark.Language) then
          return;
       end if;
@@ -126,6 +146,7 @@ package body Tool.Data is
       Benchmark.Database_Index := Benchmark.Databases.Find_Index (Database);
       Benchmark.Language_Index := Benchmark.Languages.Find_Index (Language);
       Benchmark.Driver_Index := Driver_Maps.Element (Pos).Index;
+      Benchmark.Drivers.Update_Element (Pos, Update_Driver'Access);
    end Add_Driver;
 
    procedure Set_Member (Benchmark : in out Benchmark_Info;
@@ -138,14 +159,12 @@ package body Tool.Data is
                Benchmark.Databases.Append (UBO.To_String (Value));
             end if;
             Benchmark.Driver := Value;
-            Add_Driver (Benchmark);
 
          when FIELD_LANGUAGE =>
             if not Benchmark.Languages.Contains (UBO.To_String (Value)) then
                Benchmark.Languages.Append (UBO.To_String (Value));
             end if;
             Benchmark.Language := Value;
-            Add_Driver (Benchmark);
 
          when FIELD_THREADS =>
             Benchmark.Thread_Count := UBO.To_Integer (Value);
@@ -155,6 +174,15 @@ package body Tool.Data is
 
          when FIELD_PEEK_RSS_SIZE =>
             Benchmark.Peek_Rss_Size := UBO.To_Integer (Value);
+
+         when FIELD_USER_TIME =>
+            Benchmark.User_Time := UBO.To_Integer (Value);
+
+         when FIELD_SYS_TIME =>
+            Benchmark.Sys_Time := UBO.To_Integer (Value);
+
+         when FIELD_MEASURES =>
+            Add_Driver (Benchmark);
 
          when FIELD_COUNT =>
             Benchmark.Count := Count_Type (UBO.To_Integer (Value));
@@ -218,6 +246,11 @@ package body Tool.Data is
       Mapper : Util.Serialize.Mappers.Processing;
       Reader : Util.Serialize.IO.XML.Parser;
    begin
+      Benchmark.User_Time := 0;
+      Benchmark.Sys_Time  := 0;
+      Benchmark.Thread_Count := 0;
+      Benchmark.Rss_Size := 0;
+      Benchmark.Peek_Rss_Size := 0;
       Benchmark.Language := UBO.Null_Object;
       Benchmark.Driver   := UBO.Null_Object;
       Mapper.Add_Mapping ("benchmark", Mapping'Access);
@@ -225,9 +258,54 @@ package body Tool.Data is
       Reader.Parse (Path, Mapper);
    end Read;
 
+   procedure Save (Path      : in String;
+                   Languages : in String) is
+
+      File : Ada.Text_IO.File_Type;
+
+      procedure Process_Language (Token : in String;
+                                  Done  : out Boolean) is
+         L : Language_Type := Benchmark.Languages.Find_Index (Token);
+      begin
+         Done := False;
+         for D in Benchmark.Drivers.Iterate loop
+            declare
+               Driver : constant Driver_Result := Driver_Maps.Element (D);
+            begin
+               if Driver.Language = L then
+                  Ada.Text_IO.Put (File, Benchmark.Databases.Element (Driver.Database));
+                  Ada.Text_IO.Set_Col (File, 20);
+                  Ada.Text_IO.Put (File, Benchmark.Languages.Element (L));
+                  Ada.Text_IO.Set_Col (File, 30);
+                  Ada.Text_IO.Put (File, Natural'Image (Driver.User_Time));
+                  Ada.Text_IO.Set_Col (File, 40);
+                  Ada.Text_IO.Put (File, Natural'Image (Driver.Sys_Time));
+                  Ada.Text_IO.Set_Col (File, 60);
+                  Ada.Text_IO.Put (File, Natural'Image (Driver.Peek_Rss));
+                  Ada.Text_IO.Set_Col (File, 70);
+                  Ada.Text_IO.Put (File, Natural'Image (Driver.Thread_Count));
+                  Ada.Text_IO.New_Line (File);
+               end if;
+            end;
+         end loop;
+         Ada.Text_IO.New_Line (File);
+         Ada.Text_IO.New_Line (File);
+      end Process_Language;
+
+   begin
+      Ada.Text_IO.Create (File => File,
+                          Mode => Ada.Text_IO.Out_File,
+                          Name => Path);
+      Util.Strings.Tokenizers.Iterate_Tokens (Content => Languages,
+                                              Pattern => ",",
+                                              Process => Process_Language'Access);
+      Ada.Text_IO.Close (File);
+   end Save;
+
    procedure Save (Path : in String) is
       Col : Ada.Text_IO.Positive_Count;
    begin
+
       for C in Benchmark.Benchmarks.Iterate loop
          Ada.Text_IO.Put_Line (Benchmark_Maps.Key (C));
          for P in Benchmark_Maps.Element (C).Iterate loop
@@ -424,6 +502,9 @@ begin
    Mapping.Add_Mapping ("@threads", FIELD_THREADS);
    Mapping.Add_Mapping ("@rss_size", FIELD_RSS_SIZE);
    Mapping.Add_Mapping ("@peek_rss_size", FIELD_PEEK_RSS_SIZE);
+   Mapping.Add_Mapping ("@user_time", FIELD_USER_TIME);
+   Mapping.Add_Mapping ("@sys_time", FIELD_SYS_TIME);
+   Mapping.Add_Mapping ("measures/@title", FIELD_MEASURES);
    Mapping.Add_Mapping ("measures/time/@count", FIELD_COUNT);
    Mapping.Add_Mapping ("measures/time/@total", FIELD_TOTAL);
    Mapping.Add_Mapping ("measures/time/@title", FIELD_TITLE);
