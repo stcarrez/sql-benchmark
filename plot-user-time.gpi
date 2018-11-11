@@ -1,0 +1,19 @@
+set fit quiet
+reset
+set terminal pngcairo background "#ffffff" enhanced font "arial,16" fontscale 1.0 size 800,500
+set title textcolor rgb "blue" "CPU user time"
+set ylabel "Time (s)"
+set xlabel "Driver"
+set key below
+# set style fill transparent solid 0.20 noborder
+set boxwidth 1
+set style fill solid
+set style data histograms
+
+# 85cbcf
+# 3984b6
+# 1d2e81
+plot "memory.dat" index 0 using ($3/1000):xtic(1) title "Ada" lc rgb "#3984b6", \
+     "memory.dat" index 1 using ($3/1000) title "Python" lc rgb "#1d2e81", \
+     "memory.dat" index 2 using ($3/1000) title "Java" lc rgb "#85cbcf"
+
