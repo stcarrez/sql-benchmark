@@ -46,6 +46,8 @@ package Tool.Data is
       Thread_Count : Natural     := 0;
       Rss_Size     : Natural     := 0;
       Peek_Rss     : Natural     := 0;
+      User_Time    : Natural     := 0;
+      Sys_Time     : Natural     := 0;
    end record;
 
    type Result_Type is record
@@ -83,6 +85,9 @@ package Tool.Data is
 
    procedure Save (Path : in String);
 
+   procedure Save (Path      : in String;
+                   Languages : in String);
+
    procedure Save_Excel (Path : in String);
 
 private
@@ -113,9 +118,12 @@ private
                              FIELD_THREADS,
                              FIELD_RSS_SIZE,
                              FIELD_PEEK_RSS_SIZE,
+                             FIELD_USER_TIME,
+                             FIELD_SYS_TIME,
                              FIELD_COUNT,
                              FIELD_TIME,
                              FIELD_TITLE,
+                             FIELD_MEASURES,
                              FIELD_TOTAL);
 
    type Benchmark_Info is record
@@ -126,6 +134,8 @@ private
       Thread_Count   : Natural := 0;
       Rss_Size       : Natural := 0;
       Peek_Rss_Size  : Natural := 0;
+      User_Time      : Natural := 0;
+      Sys_Time       : Natural := 0;
       Count          : Count_Type := 0;
       Driver         : UBO.Object;
       Language       : UBO.Object;
