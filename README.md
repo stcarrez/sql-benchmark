@@ -19,13 +19,30 @@ languages and SQL databases.  Some of the goals are:
 Three SQL databases are supported:
 
 * SQLite,
-* MySQL,
+* MySQL/MariaDB,
 * PostgreSQL
 
-Before running the SQL benchmark of MySQL and PostgreSQL, you must create the
+Before running the SQL benchmark of MySQL/MariaDB and PostgreSQL, you must create the
 `sqlbench` database and give access to the `sqlbench` user.
 
 The SQLite database is created automatically.
+
+## MySQL/MariaDB setup
+
+1. Create the 'sqlbench' database in MySQL/MariaDB
+
+```
+mysql -u root
+mysql> create database sqlbench;
+```
+
+2. Create the 'sqlbench' user and give the access rights:
+```
+mysql> grant select, insert, update, delete,
+       create, drop, create temporary tables, execute,
+       show view on sqlbench.* to sqlbench@'localhost';
+mysql> flush privileges;
+```
 
 ## Postgresql setup
 
@@ -34,15 +51,14 @@ To create manually the database, you can proceed to the following steps:
 1. Create the 'sqlbench' user and configure the password
 (enter 'sqlbench' for the password or update the configuration sqlbench.properties file):
 
-`
+```
 sudo -u postgres createuser sqlbench --pwprompt
-`
 
 2. Create the 'sqlbench' database in Postgresql
 
-`
+```
 sudo -u postgres createdb -O sqlbench sqlbench
-`
+```
 
 # Running
 
@@ -50,7 +66,7 @@ The script `run-all.sh` can be used to run all the benchmark and produce the res
 Before running it, make sure you have built the Ada and Java benchmark programs as
 well as the Ada aggregator tool.  To build, run the following commands.
 
-`
+```
 cd ado
 ./configure
 make
@@ -60,7 +76,7 @@ cd ../tools
 ./configure
 make
 cd ..
-`
+```
 
 Then, simply run the script:
 
