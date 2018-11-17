@@ -53,6 +53,7 @@ To create manually the database, you can proceed to the following steps:
 
 ```
 sudo -u postgres createuser sqlbench --pwprompt
+```
 
 2. Create the 'sqlbench' database in Postgresql
 
