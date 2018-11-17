@@ -44,6 +44,30 @@ sudo -u postgres createuser sqlbench --pwprompt
 sudo -u postgres createdb -O sqlbench sqlbench
 `
 
+# Running
+
+The script `run-all.sh` can be used to run all the benchmark and produce the results.
+Before running it, make sure you have built the Ada and Java benchmark programs as
+well as the Ada aggregator tool.  To build, run the following commands.
+
+`
+cd ado
+./configure
+make
+cd ../java
+mvn compile assembly:single
+cd ../tools
+./configure
+make
+cd ..
+`
+
+Then, simply run the script:
+
+```
+./run-all.sh
+```
+
 # Results
 
 ![Time](https://github.com/stcarrez/sql-benchmark/wiki/images/time.png)
