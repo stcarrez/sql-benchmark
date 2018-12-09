@@ -29,7 +29,6 @@ with ADO;
 with ADO.Drivers;
 with ADO.Sessions;
 with ADO.Sessions.Factory;
-with ADO.Statements;
 
 with Sqlbench.Simple;
 
@@ -196,7 +195,8 @@ begin
    Ada.Text_IO.Put (Util.Strings.Image (Sys_Time));
    Ada.Text_IO.Put_Line ("'>");
    Util.Measures.Write (Context.Perf, "SQL Benchmark",
-                        (if Length (Output) > 0 then Output_File else Ada.Text_IO.Standard_Output));
+                        (if Length (Output) > 0 then
+                            Output_File else Ada.Text_IO.Standard_Output));
    Ada.Text_IO.Put_Line ("</benchmark>");
    Ada.Text_IO.Flush;
 

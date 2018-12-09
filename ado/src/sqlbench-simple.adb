@@ -127,10 +127,10 @@ package body Sqlbench.Simple is
             when ADO.Statements.SQL_Error =>
                Context.Session.Rollback;
          end;
-	 Context.Session.Begin_Transaction;
+         Context.Session.Begin_Transaction;
          Create_Stmt.Execute;
          Context.Session.Commit;
-	 Context.Session.Begin_Transaction;
+         Context.Session.Begin_Transaction;
       end loop;
    end Drop_Create;
 
