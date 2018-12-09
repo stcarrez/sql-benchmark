@@ -144,6 +144,7 @@ public class Simple {
                 try {
                     dropStmt = mConnection.createStatement();
                     dropStmt.execute("DROP TABLE IF EXISTS test_simple");
+                    mConnection.commit();
                 } catch (SQLException ex) {
 
                 }
@@ -153,6 +154,7 @@ public class Simple {
                 Statement createStmt = mConnection.createStatement();
                 createStmt.execute(createSQL);
                 createStmt.close();
+                mConnection.commit();
             }
         }
     }
@@ -171,6 +173,7 @@ public class Simple {
                 insertStmt.execute();
             }
             insertStmt.close();
+	    mConnection.commit();
         }
     }
 
