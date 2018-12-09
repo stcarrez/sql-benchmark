@@ -147,12 +147,9 @@ begin
    Context.Session := Context.Factory.Get_Master_Session;
    Simple.Register (Context);
 
-   if Driver = "postgresql" then
-      Context.Session.Begin_Transaction;
-   end if;
-
    for Test of Context.Tests loop
       Context.Repeat := Repeat * Test.Factor;
+
       declare
          T : Util.Measures.Stamp;
       begin
@@ -163,6 +160,7 @@ begin
          when others =>
             null;
       end;
+
    end loop;
 
    begin
