@@ -37,6 +37,7 @@ package body Tool.Data is
                              Result : in Result_Type);
    procedure Add_Driver (Benchmark : in out Benchmark_Info);
    function Format (Value : in Duration) return String;
+   function Format_Us (Value : in Duration) return String;
 
    Empty_Perf        : Perf_Map;
    Empty_Perf_Result : Perf_Result;
@@ -96,6 +97,17 @@ package body Tool.Data is
          return Duration'Image (Value) (1 .. 6) & " s";
       end if;
    end Format;
+
+   function Format_Us (Value : in Duration) return String is
+      Result : constant String := Duration'Image (Value * 1_000_000);
+      Pos    : Positive := Result'Last;
+   begin
+      --  Drop leading zeros.
+      while Pos > Result'First and then Result (Pos) = '0' and then Result (Pos - 1) /= '.' loop
+         Pos := Pos - 1;
+      end loop;
+      return Result (Result'First .. Pos);
+   end Format_Us;
 
    procedure Collect_Result (Into   : in out Perf_Result;
                              Driver : in Driver_Type;
@@ -358,6 +370,12 @@ package body Tool.Data is
                           Name => Path);
 
       --  Print performance results.
+      Ada.Text_IO.Put (File, "# order is ");
+      Ada.Text_IO.Put (File, Databases);
+      Ada.Text_IO.Put (File, " and ");
+      Ada.Text_IO.Put (File, Languages);
+      Ada.Text_IO.New_Line (File);
+
       for C in Benchmark.Benchmarks.Iterate loop
          for P in Benchmark_Maps.Element (C).Iterate loop
             if Perf_Result_Maps.Key (P) > 0 then
@@ -378,7 +396,7 @@ package body Tool.Data is
                               R := Perf_Result_Maps.Element (P).Results.Element (Index);
                               if R.Count > 0 then
                                  Ada.Text_IO.Put
-                                   (File, Format (R.Time / Positive (R.Count)));
+                                   (File, Format_Us (R.Time / Positive (R.Count)));
                               else
                                  Ada.Text_IO.Put (File, " 0");
                               end if;
