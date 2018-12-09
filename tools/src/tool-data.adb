@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Text_IO;
+with Ada.Strings.Fixed;
 with Util.Strings;
 with Util.Log.Loggers;
 with Util.Serialize.IO.XML;
@@ -114,6 +115,10 @@ package body Tool.Data is
    end Collect_Result;
 
    procedure Add_Driver (Benchmark : in out Benchmark_Info) is
+
+      procedure Update_Driver (Key : in String;
+                               Driver : in out Driver_Result);
+
       Database   : constant String := UBO.To_String (Benchmark.Driver);
       Language   : constant String := UBO.To_String (Benchmark.Language);
       Pos        : Driver_Cursor := Benchmark.Drivers.Find (Language & " " & Database);
@@ -121,6 +126,7 @@ package body Tool.Data is
 
       procedure Update_Driver (Key : in String;
                                Driver : in out Driver_Result) is
+         pragma Unreferenced (Key);
       begin
          Driver.Count := Driver.Count + 1;
          Driver.Rss_Size := Driver.Rss_Size + Benchmark.Rss_Size;
@@ -258,14 +264,17 @@ package body Tool.Data is
       Reader.Parse (Path, Mapper);
    end Read;
 
-   procedure Save (Path      : in String;
-                   Languages : in String) is
+   procedure Save_Memory (Path      : in String;
+                          Languages : in String) is
+
+      procedure Process_Language (Token : in String;
+                                  Done  : out Boolean);
 
       File : Ada.Text_IO.File_Type;
 
       procedure Process_Language (Token : in String;
                                   Done  : out Boolean) is
-         L : Language_Type := Benchmark.Languages.Find_Index (Token);
+         L : constant Language_Type := Benchmark.Languages.Find_Index (Token);
       begin
          Done := False;
          for D in Benchmark.Drivers.Iterate loop
@@ -300,25 +309,94 @@ package body Tool.Data is
                                               Pattern => ",",
                                               Process => Process_Language'Access);
       Ada.Text_IO.Close (File);
-   end Save;
+   end Save_Memory;
 
-   procedure Save (Path : in String) is
-      Col : Ada.Text_IO.Positive_Count;
+   procedure Save (Path      : in String;
+                   Databases : in String;
+                   Languages : in String) is
+
+      procedure Process_Database (Token : in String;
+                                  Done  : out Boolean);
+      procedure Process_Language (Token : in String;
+                                  Done  : out Boolean);
+
+      DB_Count   : constant Natural := Ada.Strings.Fixed.Count (Databases, ",") + 1;
+      DB_List    : Database_Array_Index (1 .. DB_Count);
+      Lang_Count : constant Natural := Ada.Strings.Fixed.Count (Languages, ",") + 1;
+      Lang_List  : Language_Array_Index (1 .. Lang_Count);
+      Pos        : Positive := 1;
+      Col        : Ada.Text_IO.Positive_Count;
+      File       : Ada.Text_IO.File_Type;
+
+      procedure Process_Database (Token : in String;
+                                  Done  : out Boolean) is
+      begin
+         DB_List (Pos) := Benchmark.Databases.Find_Index (Token);
+         Pos := Pos + 1;
+         Done := False;
+      end Process_Database;
+
+      procedure Process_Language (Token : in String;
+                                  Done  : out Boolean) is
+      begin
+         Lang_List (Pos) := Benchmark.Languages.Find_Index (Token);
+         Pos := Pos + 1;
+         Done := False;
+      end Process_Language;
+
    begin
+      Util.Strings.Tokenizers.Iterate_Tokens (Content => Databases,
+                                              Pattern => ",",
+                                              Process => Process_Database'Access);
+      Pos := 1;
+      Util.Strings.Tokenizers.Iterate_Tokens (Content => Languages,
+                                              Pattern => ",",
+                                              Process => Process_Language'Access);
 
+      Ada.Text_IO.Create (File => File,
+                          Mode => Ada.Text_IO.Out_File,
+                          Name => Path);
+
+      --  Print performance results.
       for C in Benchmark.Benchmarks.Iterate loop
-         Ada.Text_IO.Put_Line (Benchmark_Maps.Key (C));
          for P in Benchmark_Maps.Element (C).Iterate loop
-            Ada.Text_IO.Put (Row_Count_Type'Image (Perf_Result_Maps.Key (P)));
-            for R of Perf_Result_Maps.Element (P).Results loop
-               if R.Count > 0 then
-                  Ada.Text_IO.Put (Format (R.Time / Positive (R.Count)));
-               end if;
-            end loop;
-            Ada.Text_IO.New_Line;
+            if Perf_Result_Maps.Key (P) > 0 then
+               Ada.Text_IO.Put (File, Row_Count_Type'Image (Perf_Result_Maps.Key (P)));
+               for DB_Index of DB_List loop
+                  for Lang_Index of Lang_List loop
+                     declare
+                        Database : constant String := Benchmark.Databases.Element (DB_Index);
+                        Language : constant String := Benchmark.Languages.Element (Lang_Index);
+                        Key      : constant String := Language & " " & Database;
+                        Driver   : constant Driver_Cursor := Benchmark.Drivers.Find (Key);
+                        R        : Result_Type;
+                        Index    : Driver_Type;
+                     begin
+                        if Driver_Maps.Has_Element (Driver) then
+                           Index := Driver_Maps.Element (Driver).Index;
+                           if Perf_Result_Maps.Element (P).Results.Last_Index >= Index then
+                              R := Perf_Result_Maps.Element (P).Results.Element (Index);
+                              if R.Count > 0 then
+                                 Ada.Text_IO.Put
+                                   (File, Format (R.Time / Positive (R.Count)));
+                              else
+                                 Ada.Text_IO.Put (File, " 0");
+                              end if;
+                           else
+                              Ada.Text_IO.Put (File, " 0");
+                           end if;
+                        else
+                           Ada.Text_IO.Put (File, " 0");
+                        end if;
+                     end;
+                  end loop;
+               end loop;
+               Ada.Text_IO.New_Line (File);
+            end if;
          end loop;
       end loop;
 
+      --  Print results grouped by benchmark.
       for C in Benchmark.Benchmarks.Iterate loop
          for P in Benchmark_Maps.Element (C).Iterate loop
             declare
@@ -336,10 +414,10 @@ package body Tool.Data is
                Ada.Text_IO.New_Line;
                Ada.Text_IO.Put ("| ");
                Col := 25;
-               for Database of Benchmark.Databases loop
+               for DB_Index of DB_List loop
                   Ada.Text_IO.Set_Col (Col);
                   Ada.Text_IO.Put ("| ");
-                  Ada.Text_IO.Put (Database);
+                  Ada.Text_IO.Put (Benchmark.Databases.Element (DB_Index));
                   Col := Col + 16;
                end loop;
 
@@ -347,7 +425,7 @@ package body Tool.Data is
                Ada.Text_IO.Put_Line ("|");
 
                Ada.Text_IO.Put ("|-----------------------|");
-               for Database of Benchmark.Databases loop
+               for DB_Index of DB_List loop
                   Ada.Text_IO.Put ("---------------|");
                end loop;
                Ada.Text_IO.New_Line;
@@ -359,9 +437,9 @@ package body Tool.Data is
                      Ada.Text_IO.Put ("| ");
                      Ada.Text_IO.Put (Language);
                      Col := 25;
-                     for D in 1 .. Benchmark.Databases.Last_Index loop
+                     for DB_Index of DB_List loop
                         declare
-                           Database : constant String := Benchmark.Databases.Element (D);
+                           Database : constant String := Benchmark.Databases.Element (DB_Index);
                            Key      : constant String := Language & " " & Database;
                            Driver   : constant Driver_Cursor := Benchmark.Drivers.Find (Key);
                            R        : Result_Type;
