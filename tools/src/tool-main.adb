@@ -30,8 +30,8 @@ begin
       Tool.Data.Read (Ada.Command_Line.Argument (I));
    end loop;
 
-   Tool.Data.Save ("result.dat");
-   Tool.Data.Save ("memory.dat", "Ada,Python,Java");
+   Tool.Data.Save ("result.dat", "sqlite,mysql,postgresql", "Ada,Python,Java");
+   Tool.Data.Save_Memory ("memory.dat", "Ada,Python,Java");
    Tool.Data.Save_Excel ("result.xls");
 
 exception
