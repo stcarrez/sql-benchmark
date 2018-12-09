@@ -85,7 +85,7 @@ public abstract class Benchmark {
 
             // Load the MySQL driver.
             try {
-                Class.forName("com.mysql.jdbc.Driver").newInstance();
+                Class.forName("com.mysql.jdbc.Driver");
             } catch (Exception ex) {
                 System.err.println("Loading MySQL-Driver failed!");
             }
@@ -123,6 +123,7 @@ public abstract class Benchmark {
             ds.setUrl(config);
             mDataSource = ds;
             mConnection = mDataSource.getConnection();
+            mConnection.setAutoCommit(false);
             return true;
         }
         return false;
