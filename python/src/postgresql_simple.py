@@ -52,10 +52,12 @@ class DropCreate(postgresql_benchmark.PostgreSQLBenchmark):
             stmt = db.cursor()
             try:
                 stmt.execute("DROP TABLE test_simple")
+                db.commit()
             except:
-                pass
+                db.rollback()
 
             stmt.execute(self.create_sql)
+            db.commit()
 
 class Insert(postgresql_benchmark.PostgreSQLBenchmark):
     def __init__(self):
@@ -70,6 +72,7 @@ class Insert(postgresql_benchmark.PostgreSQLBenchmark):
 
         for i in range(0, repeat):
             stmt.execute("INSERT INTO test_simple (value) VALUES (1)")
+        db.commit()
 
 class SelectTable(postgresql_benchmark.PostgreSQLBenchmark):
     def __init__(self, count):

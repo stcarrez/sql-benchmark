@@ -52,10 +52,12 @@ class DropCreate(sqlite_benchmark.SQLiteBenchmark):
             stmt = db.cursor()
             try:
                 stmt.execute("DROP TABLE test_simple")
+                db.commit()
             except:
                 pass
 
             stmt.execute(self.create_sql)
+            db.commit()
 
 class Insert(sqlite_benchmark.SQLiteBenchmark):
     def __init__(self):
@@ -70,6 +72,7 @@ class Insert(sqlite_benchmark.SQLiteBenchmark):
 
         for i in range(0, repeat):
             stmt.execute("INSERT INTO test_simple (value) VALUES (1)")
+        db.commit()
 
 class SelectTable(sqlite_benchmark.SQLiteBenchmark):
     def __init__(self, count):
