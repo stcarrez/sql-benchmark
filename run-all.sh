@@ -1,6 +1,35 @@
 #!/bin/sh
 
+
+PASS=1
 REPEAT=100
+
+usage() {
+  echo "Usage: run-all.sh [-repeat N] [-pass num]"
+  exit 2
+}
+
+while test $# -ne 0; do
+  case $1 in
+    -repeat)
+       shift
+       test $# -eq 0 && usage
+       REPEAT=$1
+       ;;
+
+    -pass)
+       shift
+       test $# -eq 0 && usage
+       PASS=$1
+       ;;
+       
+    *)
+       usage
+       ;;
+  esac
+  shift
+done
+
 LANGUAGES="ado java python"
 DATABASES="sqlite mysql postgresql"
 
@@ -51,30 +80,30 @@ for D in $DATABASES; do
      echo "Running SQL benchmark on $D for $L"
      case $L in
        ado)
-         cd $DIR/ado && bin/sqlbench -$D -repeat $REPEAT -o ../results/$L-$D.xml
+         cd $DIR/ado && bin/sqlbench -$D -repeat $REPEAT -o ../results/$L-$D-$PASS.xml
          if test $? -ne 0; then
             echo "Execution of SQL benchmark on $D for $L failed"
             FAIL=1
          fi
-         FILES="$FILES results/$L-$D.xml"
+         FILES="$FILES results/$L-$D-$PASS.xml"
          ;;
 
        java)
-         cd $DIR/java && java -jar target/sql-benchmark-1.0.jar -$D -repeat $REPEAT -o ../results/$L-$D.xml
+         cd $DIR/java && java -jar target/sql-benchmark-1.0.jar -$D -repeat $REPEAT -o ../results/$L-$D-$PASS.xml
          if test $? -ne 0; then
             echo "Execution of SQL benchmark on $D for $L failed"
             FAIL=1
          fi
-         FILES="$FILES results/$L-$D.xml"
+         FILES="$FILES results/$L-$D-$PASS.xml"
          ;;
 
        python)
-         cd $DIR/python && python3 src -$D -repeat $REPEAT -o ../results/$L-$D.xml
+         cd $DIR/python && python3 src -$D -repeat $REPEAT -o ../results/$L-$D-$PASS.xml
          if test $? -ne 0; then
             echo "Execution of SQL benchmark on $D for $L failed"
             FAIL=1
          fi
-         FILES="$FILES results/$L-$D.xml"
+         FILES="$FILES results/$L-$D-$PASS.xml"
          ;;
 
        *)
