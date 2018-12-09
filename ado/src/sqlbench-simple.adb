@@ -122,11 +122,15 @@ package body Sqlbench.Simple is
       for I in 1 .. Context.Repeat loop
          begin
             Drop_Stmt.Execute;
+            Context.Session.Commit;
          exception
             when ADO.Statements.SQL_Error =>
-               null;
+               Context.Session.Rollback;
          end;
+	 Context.Session.Begin_Transaction;
          Create_Stmt.Execute;
+         Context.Session.Commit;
+	 Context.Session.Begin_Transaction;
       end loop;
    end Drop_Create;
 
@@ -137,6 +141,7 @@ package body Sqlbench.Simple is
       for I in 1 .. Context.Repeat loop
          Stmt.Execute;
       end loop;
+      Context.Session.Commit;
    end Insert;
 
 end Sqlbench.Simple;
