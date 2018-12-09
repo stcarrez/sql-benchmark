@@ -21,6 +21,9 @@ with Ada.Containers.Indefinite_Ordered_Maps;
 private with Ada.Containers.Indefinite_Vectors;
 private with Util.Beans.Objects;
 private with Util.Serialize.Mappers.Record_Mapper;
+
+pragma No_Recursion;
+
 package Tool.Data is
 
    --  Type representing a number of times a benchmark test is executed.
@@ -83,10 +86,14 @@ package Tool.Data is
 
    procedure Read (Path : in String);
 
-   procedure Save (Path : in String);
-
    procedure Save (Path      : in String;
-                   Languages : in String);
+                   Databases : in String;
+                   Languages : in String) with
+     Pre => Databases'Length > 0 and Languages'Length > 0;
+
+   procedure Save_Memory (Path      : in String;
+                          Languages : in String) with
+     Pre => Languages'Length > 0;
 
    procedure Save_Excel (Path : in String);
 
@@ -112,6 +119,12 @@ private
                                             Element_Type => String);
    subtype Database_Vector is Database_Vectors.Vector;
    subtype Database_Cursor is Database_Vectors.Cursor;
+
+   --  Array of database index.
+   type Database_Array_Index is array (Positive range <>) of Database_Type;
+
+   --  Array of language index.
+   type Language_Array_Index is array (Positive range <>) of Language_Type;
 
    type Benchmark_Fields is (FIELD_DRIVER,
                              FIELD_LANGUAGE,
