@@ -54,6 +54,16 @@
         <attach>false</attach>
       </configuration>
     </plugin>
+
+    <plugin>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.8.0</version>
+      <configuration>
+        <compilerArgs>
+	  <arg>-Xlint:all</arg>
+        </compilerArgs>
+      </configuration>
+    </plugin>
   </plugins>
   </build>
 
