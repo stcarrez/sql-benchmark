@@ -1,6 +1,6 @@
 with "@UTIL_DIR@config";
-with "@UTIL_DIR@util";
-with "@ADO_DIR@ado";
+with "@UTIL_DIR@utilada_sys";
+with "@ADO_DIR@ado_all";
 
 project sqlbench is
 
