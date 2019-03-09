@@ -9,7 +9,7 @@ dnl AM_MAINTAINER_MODE
 
 # Current release settings
 SQLBENCH_MAJOR_VERSION=0
-SQLBENCH_MINOR_VERSION=1
+SQLBENCH_MINOR_VERSION=2
 SQLBENCH_MICRO_VERSION=0
 SQLBENCH_VERSION=$SQLBENCH_MAJOR_VERSION.$SQLBENCH_MINOR_VERSION.$SQLBENCH_MICRO_VERSION
 AM_GNAT_CHECK_GPRBUILD
@@ -42,11 +42,11 @@ AM_SHARED_LIBRARY_SUPPORT
 ##########################################
 # Ada Util library
 ##########################################
-AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[util],
+AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[utilada_sys],
   [git@github.com:stcarrez/ada-util.git],
   [Building sqlbench requires the Ada Utility Library.],
   [
-    UTIL_DIR=${gnat_project_dir_util}
+    UTIL_DIR=${gnat_project_dir_utilada_sys}
   ])
 AC_SUBST(UTIL_DIR)
 
