@@ -1929,7 +1929,7 @@ test -n "$target_alias" &&
 
 # Current release settings
 SQLBENCH_MAJOR_VERSION=0
-SQLBENCH_MINOR_VERSION=1
+SQLBENCH_MINOR_VERSION=2
 SQLBENCH_MICRO_VERSION=0
 SQLBENCH_VERSION=$SQLBENCH_MAJOR_VERSION.$SQLBENCH_MINOR_VERSION.$SQLBENCH_MICRO_VERSION
 
@@ -3089,25 +3089,25 @@ $as_echo_n "checking Ada Utility Library... " >&6; }
 # Check whether --with-ada-util was given.
 if test "${with_ada_util+set}" = set; then :
   withval=$with_ada_util;
-      gnat_project_name_util=${withval}/
+      gnat_project_name_utilada_sys=${withval}/
       if test -d "${withval}"; then
-	    gnat_project_name_util=${withval}/util
+	    gnat_project_name_utilada_sys=${withval}/utilada_sys
 	  fi
 
 else
 
-      gnat_project_name_util=util
+      gnat_project_name_utilada_sys=utilada_sys
 
 fi
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: trying ${gnat_project_name_util}" >&5
-$as_echo "trying ${gnat_project_name_util}" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: trying ${gnat_project_name_utilada_sys}" >&5
+$as_echo "trying ${gnat_project_name_utilada_sys}" >&6; }
 
   rm -f conftest.gpr
   # Search in the GNAT project path.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${gnat_project_name_util} project exists in gnatmake's search path" >&5
-$as_echo_n "checking whether ${gnat_project_name_util} project exists in gnatmake's search path... " >&6; }
-  echo "with \"${gnat_project_name_util}\"; project conftest is for Source_Dirs use (); end conftest;" > conftest.gpr
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${gnat_project_name_utilada_sys} project exists in gnatmake's search path" >&5
+$as_echo_n "checking whether ${gnat_project_name_utilada_sys} project exists in gnatmake's search path... " >&6; }
+  echo "with \"${gnat_project_name_utilada_sys}\"; project conftest is for Source_Dirs use (); end conftest;" > conftest.gpr
   if { ac_try='gnat ls -Pconftest.gpr system.ads > /dev/null 2>conftest.out'
   { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
   (eval $ac_try) 2>&5
@@ -3115,16 +3115,16 @@ $as_echo_n "checking whether ${gnat_project_name_util} project exists in gnatmak
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }
   then
-    gnat_project_util=yes
+    gnat_project_utilada_sys=yes
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
   else
-    gnat_project_util=no
+    gnat_project_utilada_sys=no
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-    # Search in ../ada-util-*/util.gpr
-    files=`ls -r ../ada-util/util.gpr ../util/util.gpr ../ada-util-*/util.gpr 2>/dev/null`
+    # Search in ../ada-util-*/utilada_sys.gpr
+    files=`ls -r ../ada-util/utilada_sys.gpr ../utilada_sys/utilada_sys.gpr ../ada-util-*/utilada_sys.gpr 2>/dev/null`
     for name in $files; do
       dir=`dirname $name`
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Ada Utility Library project in ${dir}" >&5
@@ -3137,39 +3137,39 @@ $as_echo_n "checking for Ada Utility Library project in ${dir}... " >&6; }
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }
       then
-         gnat_project_util=yes
-		 gnat_project_name_util=${name}
+         gnat_project_utilada_sys=yes
+		 gnat_project_name_utilada_sys=${name}
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
          break
       else
-         gnat_project_util=no
+         gnat_project_utilada_sys=no
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
       fi
     done
   fi
   rm -f conftest.gpr
-  if test x${gnat_project_util} = xyes; then
-    gnat_project_with_util="with \"${gnat_project_name_util}\";";
-    gnat_project_dir_util=`dirname ${gnat_project_name_util}`
-    if test ${gnat_project_dir_util} = . ; then
-       gnat_project_dir_util=
+  if test x${gnat_project_utilada_sys} = xyes; then
+    gnat_project_with_utilada_sys="with \"${gnat_project_name_utilada_sys}\";";
+    gnat_project_dir_utilada_sys=`dirname ${gnat_project_name_utilada_sys}`
+    if test ${gnat_project_dir_utilada_sys} = . ; then
+       gnat_project_dir_utilada_sys=
     else
-       gnat_project_dir_util="${gnat_project_dir_util}/"
+       gnat_project_dir_utilada_sys="${gnat_project_dir_utilada_sys}/"
     fi
 
-    UTIL_DIR=${gnat_project_dir_util}
+    UTIL_DIR=${gnat_project_dir_utilada_sys}
 
   else
-    gnat_project_dir_util=
-    gnat_project_name_util=
+    gnat_project_dir_utilada_sys=
+    gnat_project_name_utilada_sys=
     if test x"Building sqlbench requires the Ada Utility Library." != x; then
       as_fn_error $? "Building sqlbench requires the Ada Utility Library.
   You should build and install the Ada Utility Library component.
   It must be available and found by ${GNATMAKE}.
   This project was not found in the ADA_PROJECT_PATH environment variable.
-  This project was not found in ../util nor in ../ada-util-*.
+  This project was not found in ../utilada_sys nor in ../ada-util-*.
   The component is available at git@github.com:stcarrez/ada-util.git.
   Please, download and configure Ada Utility Library.
   The current configuration was using:
