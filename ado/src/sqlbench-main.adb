@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  sqlbench-main -- Main SQL Bencharmk
---  Copyright (C) 2018 Stephane Carrez
+--  Copyright (C) 2018, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ with Util.Strings;
 with Util.Files;
 
 with ADO;
+with ADO.Configs;
 with ADO.Drivers;
 with ADO.Sessions;
 with ADO.Sessions.Factory;
@@ -142,7 +143,7 @@ begin
 
    --  Initialize the session factory to connect to the
    --  database defined by 'ado.database' property.
-   Context.Factory.Create (ADO.Drivers.Get_Config (To_String (Driver) & ".database"));
+   Context.Factory.Create (ADO.Configs.Get_Config (To_String (Driver) & ".database"));
    Context.Session := Context.Factory.Get_Master_Session;
    Simple.Register (Context);
 
