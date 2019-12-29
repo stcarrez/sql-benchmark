@@ -36,7 +36,12 @@ mysql -u root
 mysql> create database sqlbench;
 ```
 
-2. Create the 'sqlbench' user and give the access rights:
+2. Create the 'sqlbench' user:
+```
+mysql> create user 'sqlbench'@'localhost' identified by 'sqlbench';
+```
+
+3. Give the access rights:
 ```
 mysql> grant select, insert, update, delete,
        create, drop, create temporary tables, execute,
