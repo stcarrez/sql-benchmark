@@ -1,5 +1,6 @@
 with "@UTIL_DIR@config";
-with "@UTIL_DIR@util";
+with "@UTIL_DIR@utilada_sys";
+with "@UTIL_DIR@utilada_xml";
 
 project tool is
 
