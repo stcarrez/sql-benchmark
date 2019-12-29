@@ -28,6 +28,7 @@ with Util.Files;
 with ADO;
 with ADO.Configs;
 with ADO.Drivers;
+with ADO.Connections;
 with ADO.Sessions;
 with ADO.Sessions.Factory;
 
@@ -202,7 +203,7 @@ begin
    Ada.Text_IO.Flush;
 
 exception
-   when E : ADO.Drivers.Database_Error | ADO.Sessions.Connection_Error =>
+   when E : ADO.Connections.Database_Error | ADO.Sessions.Connection_Error =>
       Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error,
                             "Cannot connect to database: "
                               & Ada.Exceptions.Exception_Message (E));
